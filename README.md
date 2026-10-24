@@ -76,7 +76,7 @@ et l'app demande un mot de passe à l'ouverture. Dans Vercel › Settings › En
 |---|---|
 | `SHEETS_URL` | URL `/exec` de la Web App |
 | `SHEETS_TOKEN` | valeur de `API_TOKEN` (propriétés du script) |
-| `APP_PASSWORD` | mot de passe choisi pour ouvrir l'app |
+| `APP_PASSWORD` | (facultatif) mot de passe pour ouvrir l'app ; sans lui, toute personne ayant l'URL accède aux données |
 
 Ne pas définir `VITE_SHEETS_URL` / `VITE_SHEETS_TOKEN` sur Vercel : les variables `VITE_` sont copiées dans le JavaScript public.
 Après modification des variables : Deployments › Redeploy.

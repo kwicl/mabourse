@@ -5,7 +5,8 @@
  * Variables d'environnement Vercel (sans préfixe VITE_, donc jamais envoyées au navigateur) :
  *   SHEETS_URL    URL /exec de la Web App
  *   SHEETS_TOKEN  valeur de API_TOKEN dans les propriétés du script
- *   APP_PASSWORD  mot de passe demandé à l'ouverture de l'app
+ *   APP_PASSWORD  (facultatif) mot de passe demandé à l'ouverture de l'app.
+ *                 Absent : aucun mot de passe, toute personne ayant l'URL du site accède aux données.
  */
 import { timingSafeEqual } from 'node:crypto';
 
@@ -22,8 +23,10 @@ const fail = (res, status, error, code) => res.status(status).json({ ok: false, 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const { SHEETS_URL, SHEETS_TOKEN = '', APP_PASSWORD } = process.env;
-  if (!SHEETS_URL || !APP_PASSWORD) return fail(res, 503, 'Serveur non configuré (SHEETS_URL / APP_PASSWORD).', 'not_configured');
-  if (!samePassword(req.headers['x-app-password'] || '', APP_PASSWORD)) return fail(res, 401, 'Mot de passe incorrect.', 'unauthorized');
+  if (!SHEETS_URL) return fail(res, 503, 'Serveur non configuré (SHEETS_URL).', 'not_configured');
+  if (APP_PASSWORD && !samePassword(req.headers['x-app-password'] || '', APP_PASSWORD)) {
+    return fail(res, 401, 'Mot de passe incorrect.', 'unauthorized');
+  }
 
   try {
     let upstream;
