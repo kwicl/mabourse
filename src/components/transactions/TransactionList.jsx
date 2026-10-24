@@ -1,16 +1,19 @@
 import { ArrowLeftRight } from 'lucide-react';
 import CategoryIcon from '../ui/CategoryIcon';
 import { useFinance } from '../../context/FinanceContext';
-import { money, relativeDayLabel } from '../../utils/format';
+import { relativeDayLabel } from '../../utils/format';
+import Amount from '../ui/Amount';
 
 function Row({ t, onSelect }) {
   const { categoryById, accountById } = useFinance();
-  const cat = categoryById(t.categoryId);
+  const cat = categoryById(t.categoryId, t.type);
   const isTransfer = t.type === 'transfer';
   const title = isTransfer ? 'Transfert' : cat?.name ?? 'Sans catégorie';
+  // La note reprend la catégorie quand elle n'est pas renseignée : inutile de la répéter
+  const note = t.note && t.note !== title ? t.note : '';
   const sub = isTransfer
     ? `${accountById(t.accountId)?.name ?? '?'} → ${accountById(t.toAccountId)?.name ?? '?'}`
-    : [t.note, accountById(t.accountId)?.name].filter(Boolean).join(' · ');
+    : [note, accountById(t.accountId)?.name].filter(Boolean).join(' · ');
   const color = t.type === 'income' ? 'text-income' : t.type === 'expense' ? 'text-ink-900 dark:text-ink-50' : 'text-ink-400';
   const sign = t.type === 'income' ? '+' : t.type === 'expense' ? '−' : '';
 
@@ -32,7 +35,7 @@ function Row({ t, onSelect }) {
       </span>
       <span className={`num text-[14px] font-medium transition-transform duration-300 ease-out group-hover:-translate-x-0.5 ${color}`}>
         {sign}
-        {money(t.amount)}
+        <Amount value={t.amount} />
       </span>
     </button>
   );
@@ -61,7 +64,7 @@ export default function TransactionList({ transactions, onSelect, grouped = true
               <span className="h-px flex-1 bg-sand-line dark:bg-night-line" />
               <span className={`num text-xs ${net >= 0 ? 'text-income' : 'text-ink-500 dark:text-ink-400'}`}>
                 {net >= 0 ? '+' : '−'}
-                {money(Math.abs(net))}
+                <Amount value={Math.abs(net)} />
               </span>
             </div>
             {g.items.map((t) => (

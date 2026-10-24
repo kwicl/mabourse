@@ -3,6 +3,7 @@ import { Loader2, Moon, Plus, Sun } from 'lucide-react';
 import Sidebar, { MobileNav, NAV } from './components/layout/Sidebar';
 import { LogoMark } from './components/layout/Logo';
 import TransactionForm from './components/transactions/TransactionForm';
+import LockScreen from './components/LockScreen';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
@@ -32,6 +33,8 @@ export default function App() {
   const Page = PAGES[route] ?? Dashboard;
   const nav = NAV.find((n) => n.id === route) ?? NAV[0];
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  if (status === 'locked') return <LockScreen />;
 
   return (
     <div className="flex min-h-screen">

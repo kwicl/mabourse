@@ -54,7 +54,8 @@ export default function TransactionForm({ open, onClose, initial }) {
       categoryId: form.type === 'transfer' ? '' : form.categoryId,
       accountId: form.accountId,
       toAccountId: form.type === 'transfer' ? form.toAccountId : '',
-      note: form.note.trim(),
+      // Note vide : reprend le nom de la catégorie
+      note: form.note.trim() || (form.type === 'transfer' ? '' : cats.find((c) => c.id === form.categoryId)?.name ?? ''),
     };
     setSaving(true);
     try {

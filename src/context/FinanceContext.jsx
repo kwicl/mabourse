@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as api from '../services/sheetService';
+import { setPassword } from '../config';
 
 const { SHEETS } = api;
 const FinanceContext = createContext(null);
@@ -13,7 +14,7 @@ const KEY_BY_SHEET = {
 
 export function FinanceProvider({ children }) {
   const [data, setData] = useState({ transactions: [], categories: [], budgets: [], accounts: [] });
-  const [status, setStatus] = useState('loading'); // loading | ready | error
+  const [status, setStatus] = useState('loading'); // loading | ready | error | locked
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
 
@@ -31,7 +32,9 @@ export function FinanceProvider({ children }) {
       setError(null);
     } catch (e) {
       setError(e.message);
-      setStatus((s) => (s === 'loading' ? 'error' : s));
+      // Mot de passe absent ou refusé par le gardien : écran de déverrouillage
+      if (e.code === 'unauthorized') setStatus('locked');
+      else setStatus((s) => (s === 'loading' || s === 'locked' ? 'error' : s));
     } finally {
       setSyncing(false);
     }
@@ -40,6 +43,20 @@ export function FinanceProvider({ children }) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Gardien Vercel : enregistre le mot de passe sur l'appareil puis recharge.
+  const unlock = useCallback(
+    (password) => {
+      setPassword(password);
+      return refresh();
+    },
+    [refresh],
+  );
+  const lock = useCallback(() => {
+    setPassword('');
+    setStatus('locked');
+    setError(null);
+  }, []);
 
   // Réimporte "Feuille 1" dans Transactions, puis recharge les données.
   const [importing, setImporting] = useState(false);
@@ -96,6 +113,9 @@ export function FinanceProvider({ children }) {
       error,
       syncing,
       remote: api.isRemote(),
+      proxy: api.usesProxy(),
+      unlock,
+      lock,
       refresh,
       syncSource,
       importing,
@@ -103,10 +123,12 @@ export function FinanceProvider({ children }) {
       budgetsApi: crud(SHEETS.BUDGETS),
       categoriesApi: crud(SHEETS.CATEGORIES),
       accountsApi: crud(SHEETS.ACCOUNTS),
-      categoryById: (id) => data.categories.find((c) => c.id === id),
+      // Une même catégorie peut exister en dépense et en revenu : le type départage
+      categoryById: (id, type) =>
+        data.categories.find((c) => c.id === id && (!type || c.type === type)) ?? data.categories.find((c) => c.id === id),
       accountById: (id) => data.accounts.find((a) => a.id === id),
     }),
-    [data, status, error, syncing, refresh, syncSource, importing, crud],
+    [data, status, error, syncing, refresh, syncSource, importing, unlock, lock, crud],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

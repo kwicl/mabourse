@@ -2,12 +2,13 @@
  * sheetService — couche d'accès aux données.
  *
  * Mode "sheets" : appelle la Web App Google Apps Script (voir google-apps-script/Code.gs).
+ * Mode "proxy"  : en production sans URL directe, passe par api/sheets.js (jeton côté serveur, mot de passe).
  * Mode "local"  : aucune URL configurée -> données factices persistées dans localStorage.
  *
  * Feuilles : Transactions, Categories, Budgets, Accounts.
  * Toutes les méthodes renvoient des Promises.
  */
-import { getConfig } from '../config';
+import { getConfig, getPassword } from '../config';
 import { buildMockDatabase } from '../data/mockData';
 
 export const SHEETS = {
@@ -20,7 +21,14 @@ export const SHEETS = {
 const LOCAL_DB_KEY = 'mabourse-local-db';
 
 export function isRemote() {
-  return Boolean(getConfig().sheetsUrl);
+  const { sheetsUrl, proxyUrl } = getConfig();
+  return Boolean(sheetsUrl || proxyUrl);
+}
+
+/** true quand l'app passe par le gardien Vercel (mot de passe requis). */
+export function usesProxy() {
+  const { sheetsUrl, proxyUrl } = getConfig();
+  return !sheetsUrl && Boolean(proxyUrl);
 }
 
 export function uid() {
@@ -32,7 +40,13 @@ export function uid() {
 /* ------------------------------------------------------------------ */
 
 async function remoteGet(params) {
-  const { sheetsUrl, sheetsToken } = getConfig();
+  const { sheetsUrl, sheetsToken, proxyUrl } = getConfig();
+  if (usesProxy()) {
+    const res = await fetch(`${proxyUrl}?${new URLSearchParams(params)}`, {
+      headers: { 'x-app-password': getPassword() },
+    });
+    return unwrap(res);
+  }
   const url = new URL(sheetsUrl);
   Object.entries({ ...params, token: sheetsToken }).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
@@ -40,7 +54,15 @@ async function remoteGet(params) {
 }
 
 async function remotePost(body) {
-  const { sheetsUrl, sheetsToken } = getConfig();
+  const { sheetsUrl, sheetsToken, proxyUrl } = getConfig();
+  if (usesProxy()) {
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-app-password': getPassword() },
+      body: JSON.stringify(body),
+    });
+    return unwrap(res);
+  }
   // text/plain évite la requête preflight CORS, non supportée par Apps Script.
   const res = await fetch(sheetsUrl, {
     method: 'POST',
@@ -52,9 +74,17 @@ async function remotePost(body) {
 }
 
 async function unwrap(res) {
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error || 'Erreur Google Sheets');
+  let json = null;
+  try {
+    json = await res.json();
+  } catch {
+    /* corps non JSON */
+  }
+  if (!res.ok || !json?.ok) {
+    const err = new Error(json?.error || `HTTP ${res.status}`);
+    err.code = json?.code || (res.status === 401 ? 'unauthorized' : undefined);
+    throw err;
+  }
   return json.data;
 }
 

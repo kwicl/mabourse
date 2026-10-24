@@ -10,7 +10,7 @@ export default function Segmented({ options, value, onChange, size = 'md' }) {
             key={o.value}
             type="button"
             onClick={() => onChange(o.value)}
-            className={`${pad} rounded-full font-medium transition-all duration-300 ease-out ${
+            className={`${pad} shrink-0 whitespace-nowrap rounded-full font-medium transition-all duration-300 ease-out ${
               active
                 ? 'bg-white text-ink-900 shadow-soft dark:bg-white/[0.1] dark:text-ink-50'
                 : 'text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100'

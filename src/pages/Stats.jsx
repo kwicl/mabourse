@@ -9,7 +9,8 @@ import CategoryIcon from '../components/ui/CategoryIcon';
 import { useFinance } from '../context/FinanceContext';
 import { useChartTheme } from '../hooks/useChartTheme';
 import { byCategory, monthlySeries, shiftMonth } from '../utils/stats';
-import { money, monthKey, monthLabel, pct, todayISO } from '../utils/format';
+import { monthKey, monthLabel, pct, todayISO } from '../utils/format';
+import Amount from '../components/ui/Amount';
 
 function SavingsRate({ data }) {
   const t = useChartTheme();
@@ -63,9 +64,9 @@ export default function Stats() {
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {[
-          ['Revenu moyen', money(avg('income')), 'text-income'],
-          ['Dépense moyenne', money(avg('expense')), 'text-expense'],
-          ['Épargne moyenne', money(avg('net')), ''],
+          ['Revenu moyen', <Amount value={avg('income')} />, 'text-income'],
+          ['Dépense moyenne', <Amount value={avg('expense')} />, 'text-expense'],
+          ['Épargne moyenne', <Amount value={avg('net')} />, ''],
           ['Meilleur mois', best ? monthLabel(best.key, 'long') : '—', 'capitalize'],
         ].map(([label, value, cls], i) => (
           <div key={label} className="glass glass-hover animate-fade-up p-5 sm:p-6" style={{ animationDelay: `${i * 60}ms` }}>
@@ -149,8 +150,8 @@ export default function Stats() {
                         {c.name}
                       </span>
                     </td>
-                    <td className="num py-2.5 text-right text-ink-400">{money(prev)}</td>
-                    <td className="num py-2.5 text-right font-medium">{money(c.value)}</td>
+                    <td className="num py-2.5 text-right text-ink-400"><Amount value={prev} /></td>
+                    <td className="num py-2.5 text-right font-medium"><Amount value={c.value} /></td>
                     <td className={`num py-2.5 text-right ${Number.isFinite(diff) ? (good ? 'text-income' : 'text-expense') : 'text-ink-400'}`}>
                       {Number.isFinite(diff) ? pct(diff) : 'nouveau'}
                     </td>

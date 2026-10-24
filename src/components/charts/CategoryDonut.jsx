@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from 'recharts';
 import CategoryIcon from '../ui/CategoryIcon';
-import { money } from '../../utils/format';
 import { useChartTheme } from '../../hooks/useChartTheme';
+import Amount from '../ui/Amount';
 
 const renderActive = (props) => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
@@ -52,7 +52,7 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
           <span className="label">{focus ? focus.name : 'Total'}</span>
-          <span className="serif mt-1 max-w-[62%] text-lg leading-tight sm:text-xl">{money(focus ? focus.value : total)}</span>
+          <span className="serif mt-1 max-w-[62%] text-lg leading-tight sm:text-xl"><Amount value={focus ? focus.value : total} /></span>
           {focus && <span className="text-xs text-ink-500">{Math.round(focus.share * 100)} %</span>}
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
             >
               <CategoryIcon icon={s.icon} color={s.color} size={32} />
               <span className="min-w-0 flex-1 truncate text-sm">{s.name}</span>
-              <span className="num text-sm font-medium">{money(s.value)}</span>
+              <span className="num text-sm font-medium"><Amount value={s.value} /></span>
               <span className="w-10 text-right text-xs text-ink-400">{Math.round(s.share * 100)}%</span>
             </li>
           ))}

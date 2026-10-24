@@ -131,13 +131,14 @@ function importFeuille1() {
     }
     // Ligne "dépense 1 + revenu" : seul le revenu compte
     if (spent && income && spent <= 1) spent = 0;
+    // Note vide : reprend le nom de la catégorie
     if (spent) {
       var ce = importCategory_(categories, catName || 'Autre', 'expense');
-      tx.push([income ? base + '-e' : base, date, 'expense', spent, ce, IMPORT_CASH, '', note, '']);
+      tx.push([income ? base + '-e' : base, date, 'expense', spent, ce, IMPORT_CASH, '', note || catName || 'Autre', '']);
     }
     if (income) {
       var ci = importCategory_(categories, catName || 'Autres revenus', 'income');
-      tx.push([spent ? base + '-i' : base, date, 'income', income, ci, IMPORT_CASH, '', note, '']);
+      tx.push([spent ? base + '-i' : base, date, 'income', income, ci, IMPORT_CASH, '', note || catName || 'Autres revenus', '']);
     }
   });
 
@@ -154,6 +155,8 @@ function importFeuille1() {
   var kept = txSheet.getLastRow() > 1
     ? txSheet.getRange(2, 1, txSheet.getLastRow() - 1, SCHEMA.Transactions.length).getValues()
         .filter(function (row) { return row[0] !== '' && String(row[0]).indexOf('imp-') !== 0; })
+        // Anciennes saisies : retire le préfixe exp- / inc- de la catégorie
+        .map(function (row) { row[4] = String(row[4]).replace(/^(exp|inc)-/, ''); return row; })
     : [];
   var now = new Date().toISOString();
   tx.forEach(function (row) { row[8] = now; });
@@ -181,12 +184,13 @@ function importNum_(v) {
 
 function importCategory_(map, name, type) {
   var slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  var id = (type === 'income' ? 'inc-' : 'exp-') + slug;
-  if (!map[id]) {
+  // id lisible sans préfixe ; dépense et revenu de même nom se distinguent par la colonne type
+  var key = type + ':' + slug;
+  if (!map[key]) {
     var n = Object.keys(map).length;
-    map[id] = [id, name, type, importIcon_(slug, type), IMPORT_PALETTE[n % IMPORT_PALETTE.length]];
+    map[key] = [slug, name, type, importIcon_(slug, type), IMPORT_PALETTE[n % IMPORT_PALETTE.length]];
   }
-  return id;
+  return slug;
 }
 
 function importIcon_(slug, type) {

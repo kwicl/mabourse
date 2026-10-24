@@ -67,6 +67,22 @@ Pour un usage personnel, préférez la saisie dans **Réglages** (stocké unique
 - `POST` (corps JSON en `text/plain` pour éviter le preflight CORS) : `create`, `update`, `delete`, `bulkCreate`.
 - Écritures sérialisées par `LockService`.
 
+## Déploiement Vercel (accès sécurisé)
+
+En production, l'app passe par la fonction serverless `api/sheets.js` : le jeton reste sur le serveur
+et l'app demande un mot de passe à l'ouverture. Dans Vercel › Settings › Environment Variables :
+
+| Variable | Valeur |
+|---|---|
+| `SHEETS_URL` | URL `/exec` de la Web App |
+| `SHEETS_TOKEN` | valeur de `API_TOKEN` (propriétés du script) |
+| `APP_PASSWORD` | mot de passe choisi pour ouvrir l'app |
+
+Ne pas définir `VITE_SHEETS_URL` / `VITE_SHEETS_TOKEN` sur Vercel : les variables `VITE_` sont copiées dans le JavaScript public.
+Après modification des variables : Deployments › Redeploy.
+
+Sur iPhone : Safari › Partager › « Sur l'écran d'accueil » pour installer l'icône mABOUrse.
+
 ## Build
 
 ```bash

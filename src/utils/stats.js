@@ -66,36 +66,58 @@ export function balanceSeries(accounts, transactions, days = 30) {
   return out;
 }
 
-/**
- * Solde quotidien + revenus/dépenses cumulés sur `days` jours se terminant aujourd'hui.
- * Montants du jour : dayIncome, dayExpense, dayNet (variation du solde, transferts exclus car neutres).
- */
-export function flowSeries(accounts, transactions, days = 30) {
-  const balance = balanceSeries(accounts, transactions, days);
-  const startISO = balance[0]?.date;
-  const byDay = {};
-  for (const t of transactions) {
-    if (t.date < startISO || (t.type !== 'income' && t.type !== 'expense')) continue;
-    byDay[t.date] ??= { income: 0, expense: 0 };
-    byDay[t.date][t.type] += num(t.amount);
-  }
+/** Revenus / dépenses entre deux dates ISO incluses. */
+export function totalsBetween(transactions, fromISO, toISO) {
   let income = 0;
   let expense = 0;
-  return balance.map((d) => {
-    const dayIncome = byDay[d.date]?.income || 0;
-    const dayExpense = byDay[d.date]?.expense || 0;
-    income += dayIncome;
-    expense += dayExpense;
-    return {
-      ...d,
-      income: Math.round(income * 100) / 100,
-      expense: Math.round(expense * 100) / 100,
-      dayIncome,
-      dayExpense,
-      dayNet: dayIncome - dayExpense,
-    };
-  });
+  for (const t of transactions) {
+    if (t.date < fromISO || t.date > toISO) continue;
+    if (t.type === 'income') income += num(t.amount);
+    if (t.type === 'expense') expense += num(t.amount);
+  }
+  return { income, expense, net: income - expense };
 }
+
+/**
+ * Série quotidienne entre deux dates ISO incluses : solde, revenus/dépenses cumulés depuis `fromISO`,
+ * et montants du jour (dayIncome, dayExpense, dayNet ; transferts exclus car neutres sur le total).
+ */
+export function seriesBetween(accounts, transactions, fromISO, toISO) {
+  let balance = totalBalance(accounts, transactions.filter((t) => t.date < fromISO));
+  const byDay = {};
+  for (const t of transactions) {
+    if (t.date < fromISO || t.date > toISO) continue;
+    byDay[t.date] ??= { income: 0, expense: 0, net: 0 };
+    byDay[t.date].net += signedAmount(t);
+    if (t.type === 'income' || t.type === 'expense') byDay[t.date][t.type] += num(t.amount);
+  }
+  const r2 = (v) => Math.round(v * 100) / 100;
+  const out = [];
+  let income = 0;
+  let expense = 0;
+  const end = new Date(`${toISO}T12:00:00`);
+  for (let d = new Date(`${fromISO}T12:00:00`); d <= end; d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().slice(0, 10);
+    const day = byDay[iso] || { income: 0, expense: 0, net: 0 };
+    balance += day.net;
+    income += day.income;
+    expense += day.expense;
+    out.push({
+      date: iso,
+      balance: r2(balance),
+      income: r2(income),
+      expense: r2(expense),
+      dayIncome: day.income,
+      dayExpense: day.expense,
+      dayNet: day.net,
+    });
+  }
+  return out;
+}
+
+// Une même catégorie peut exister en dépense et en revenu : le type départage
+const findCategory = (categories, id, type) =>
+  categories.find((x) => x.id === id && x.type === type) ?? categories.find((x) => x.id === id);
 
 /** Dépenses (ou revenus) par catégorie entre deux dates ISO incluses. */
 export function byCategoryRange(transactions, categories, fromISO, toISO, type = 'expense') {
@@ -107,7 +129,7 @@ export function byCategoryRange(transactions, categories, fromISO, toISO, type =
   const total = Object.values(map).reduce((a, b) => a + b, 0);
   return Object.entries(map)
     .map(([id, value]) => {
-      const c = categories.find((x) => x.id === id) || { id, name: 'Autre', color: '#9ca3af', icon: 'Circle' };
+      const c = findCategory(categories, id, type) || { id, name: 'Autre', color: '#9ca3af', icon: 'Circle' };
       return { ...c, value, share: total ? value / total : 0 };
     })
     .sort((a, b) => b.value - a.value);
@@ -123,7 +145,7 @@ export function byCategory(transactions, categories, key, type = 'expense') {
   const total = Object.values(map).reduce((a, b) => a + b, 0);
   return Object.entries(map)
     .map(([id, value]) => {
-      const c = categories.find((x) => x.id === id) || { id, name: 'Autre', color: '#9ca3af', icon: 'Circle' };
+      const c = findCategory(categories, id, type) || { id, name: 'Autre', color: '#9ca3af', icon: 'Circle' };
       return { ...c, value, share: total ? value / total : 0 };
     })
     .sort((a, b) => b.value - a.value);

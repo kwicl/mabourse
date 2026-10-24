@@ -4,7 +4,7 @@ import Card from '../components/ui/Card';
 import Segmented from '../components/ui/Segmented';
 import TransactionList from '../components/transactions/TransactionList';
 import { useFinance } from '../context/FinanceContext';
-import { money } from '../utils/format';
+import Amount from '../components/ui/Amount';
 
 export default function Transactions({ onEdit }) {
   const { transactions, categories, accounts } = useFinance();
@@ -19,7 +19,7 @@ export default function Transactions({ onEdit }) {
     const needle = q.trim().toLowerCase();
     return transactions
       .filter((t) => type === 'all' || t.type === type)
-      .filter((t) => !cat || t.categoryId === cat)
+      .filter((t) => !cat || `${t.type}:${t.categoryId}` === cat)
       .filter((t) => !acc || t.accountId === acc || t.toAccountId === acc)
       .filter((t) => !from || t.date >= from)
       .filter((t) => !to || t.date <= to)
@@ -73,7 +73,10 @@ export default function Transactions({ onEdit }) {
             <select value={cat} onChange={(e) => setCat(e.target.value)} className="input !py-2.5">
               <option value="">Toutes catégories</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={`${c.type}:${c.id}`} value={`${c.type}:${c.id}`}>
+                  {c.name}
+                  {c.type === 'income' ? ' (revenu)' : ''}
+                </option>
               ))}
             </select>
             <select value={acc} onChange={(e) => setAcc(e.target.value)} className="input !py-2.5">
@@ -87,8 +90,8 @@ export default function Transactions({ onEdit }) {
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
             <span className="text-ink-400">{filtered.length} opérations</span>
-            <span className="num text-income">+{money(totals.income)}</span>
-            <span className="num text-expense">−{money(totals.expense)}</span>
+            <span className="num text-income">+<Amount value={totals.income} /></span>
+            <span className="num text-expense">−<Amount value={totals.expense} /></span>
             {hasFilters && (
               <button onClick={reset} className="btn-ghost ml-auto !py-1 text-xs">
                 <X size={14} /> Réinitialiser

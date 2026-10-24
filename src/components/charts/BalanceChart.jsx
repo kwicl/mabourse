@@ -23,7 +23,7 @@ export function seriesColors(t) {
  * Solde (axe gauche) + revenus / dépenses cumulés (axe droit) sur un même graphique.
  * `visible` = { balance, income, expense }. L'épaisseur de chaque courbe est proportionnelle à son montant.
  */
-export default function BalanceChart({ data, visible = { balance: true }, height = 260 }) {
+export default function BalanceChart({ data, visible = { balance: true }, hideBalance = false, height = 260 }) {
   const t = useChartTheme();
   const colors = seriesColors(t);
   const last = data[data.length - 1] || {};
@@ -57,7 +57,7 @@ export default function BalanceChart({ data, visible = { balance: true }, height
         </defs>
         <CartesianGrid vertical={false} stroke={t.grid} strokeDasharray="2 6" />
         <XAxis dataKey="date" tickFormatter={dayLabel} minTickGap={32} dy={8} {...axis} />
-        <YAxis yAxisId="balance" hide={!visible.balance} domain={left.domain} ticks={left.ticks} tickFormatter={compact} width={44} {...axis} />
+        <YAxis yAxisId="balance" hide={!visible.balance || hideBalance} domain={left.domain} ticks={left.ticks} tickFormatter={compact} width={44} {...axis} />
         <YAxis
           yAxisId="flow"
           orientation="right"
@@ -68,7 +68,7 @@ export default function BalanceChart({ data, visible = { balance: true }, height
           width={44}
           {...axis}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={dayLabel} colors={colors} />} cursor={{ stroke: t.cursor, strokeDasharray: '4 4' }} />
+        <Tooltip content={<ChartTooltip labelFormatter={dayLabel} colors={colors} masked={hideBalance ? ['balance'] : []} />} cursor={{ stroke: t.cursor, strokeDasharray: '4 4' }} />
 
         {visible.balance && (
           <Area

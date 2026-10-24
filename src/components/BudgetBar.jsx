@@ -1,5 +1,6 @@
 import CategoryIcon from './ui/CategoryIcon';
 import { money } from '../utils/format';
+import Amount from './ui/Amount';
 
 /** Couleur selon le taux de consommation : sauge < 75 %, ocre < 100 %, terracotta au-delà. */
 export function budgetTone(ratio) {
@@ -23,8 +24,8 @@ export default function BudgetBar({ category, spent, amount, compact = false, on
           <div className="flex items-baseline justify-between gap-2">
             <span className="truncate text-[14px] font-medium">{category?.name ?? '—'}</span>
             <span className="text-[13px]">
-              <span className="serif text-[15px]">{money(spent)}</span>
-              <span className="num text-ink-400"> / {money(amount)}</span>
+              <span className="serif text-[15px]"><Amount value={spent} /></span>
+              <span className="num text-ink-400"> / <Amount value={amount} /></span>
             </span>
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sand/70 dark:bg-white/[0.06]">

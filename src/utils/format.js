@@ -6,7 +6,8 @@ function formatter() {
   if (!cached || cached.currency !== currency) {
     cached = {
       currency,
-      full: new Intl.NumberFormat('fr-FR', { style: 'currency', currency, maximumFractionDigits: 2 }),
+      // Un chiffre après la virgule
+      full: new Intl.NumberFormat('fr-FR', { style: 'currency', currency, minimumFractionDigits: 1, maximumFractionDigits: 1 }),
       compact: new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 }),
     };
   }
@@ -14,6 +15,15 @@ function formatter() {
 }
 
 export const money = (v) => formatter().full.format(v || 0);
+
+/** Montant découpé : { number: '327 773,0', currency: 'MAD' } pour styler la devise à part. */
+export function moneyParts(v) {
+  const parts = formatter().full.formatToParts(v || 0);
+  return {
+    number: parts.filter((p) => p.type !== 'currency').map((p) => p.value).join('').trim(),
+    currency: parts.find((p) => p.type === 'currency')?.value ?? '',
+  };
+}
 export const compact = (v) => formatter().compact.format(v || 0);
 export const signedMoney = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + money(Math.abs(v));
 

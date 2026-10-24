@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Database, Loader2, RotateCcw, Upload, XCircle } from 'lucide-react';
+import { CheckCircle2, Database, Loader2, Lock, RotateCcw, Upload, XCircle } from 'lucide-react';
 import Card from '../components/ui/Card';
 import { getConfig, saveConfig } from '../config';
 import { ping, resetLocalData, seedRemote } from '../services/sheetService';
@@ -7,7 +7,7 @@ import { useFinance } from '../context/FinanceContext';
 import SourceSyncButton from '../components/SourceSyncButton';
 
 export default function Settings() {
-  const { refresh, remote } = useFinance();
+  const { refresh, remote, proxy, lock } = useFinance();
   const [cfg, setCfg] = useState(getConfig);
   const [state, setState] = useState({ busy: false, msg: '', ok: null });
 
@@ -30,6 +30,14 @@ export default function Settings() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
+      {proxy && (
+        <Card title="Accès sécurisé" subtitle="Connecté à Google Sheets via le serveur Vercel ; le jeton ne quitte jamais le serveur.">
+          <button onClick={lock} className="btn-primary">
+            <Lock size={16} /> Verrouiller l'app sur cet appareil
+          </button>
+        </Card>
+      )}
+
       <Card title="Google Sheets" subtitle="Base de données de l'application">
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">

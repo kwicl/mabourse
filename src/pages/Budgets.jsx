@@ -8,7 +8,8 @@ import BudgetBar, { budgetTone } from '../components/BudgetBar';
 import MonthPicker from '../components/MonthPicker';
 import { useFinance } from '../context/FinanceContext';
 import { byCategory } from '../utils/stats';
-import { money, monthKey, todayISO } from '../utils/format';
+import { monthKey, todayISO } from '../utils/format';
+import Amount from '../components/ui/Amount';
 
 function BudgetForm({ open, onClose, initial }) {
   const { categories, budgets, budgetsApi } = useFinance();
@@ -134,15 +135,15 @@ export default function Budgets() {
           <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="label">Dépensé</dt>
-              <dd className="num mt-1 font-semibold">{money(spent)}</dd>
+              <dd className="num mt-1 font-semibold"><Amount value={spent} /></dd>
             </div>
             <div>
               <dt className="label">Budget</dt>
-              <dd className="num mt-1 font-semibold">{money(total)}</dd>
+              <dd className="num mt-1 font-semibold"><Amount value={total} /></dd>
             </div>
             <div>
               <dt className="label">Reste</dt>
-              <dd className={`num mt-1 font-semibold ${total - spent < 0 ? 'text-expense' : ''}`}>{money(total - spent)}</dd>
+              <dd className={`num mt-1 font-semibold ${total - spent < 0 ? 'text-expense' : ''}`}><Amount value={total - spent} /></dd>
             </div>
             <div>
               <dt className="label">Dépassés</dt>
@@ -155,7 +156,7 @@ export default function Budgets() {
           <div className="flex flex-col gap-2">
             {rows.length ? (
               rows.map((r) => (
-                <BudgetBar key={r.id} category={categoryById(r.categoryId)} spent={r.spent} amount={r.amount} onClick={() => setEditing(r)} />
+                <BudgetBar key={r.id} category={categoryById(r.categoryId, 'expense')} spent={r.spent} amount={r.amount} onClick={() => setEditing(r)} />
               ))
             ) : (
               <p className="py-12 text-center text-sm text-ink-400">Aucun budget. Créez-en un pour suivre vos dépenses.</p>
