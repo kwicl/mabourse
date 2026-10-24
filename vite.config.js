@@ -5,12 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5173 },
   build: {
-    // recharts (+ d3) dépasse seul 500 kB minifié
-    chunkSizeWarningLimit: 700,
-    rollupOptions: {
-      output: {
-        manualChunks: { charts: ['recharts'], vendor: ['react', 'react-dom', 'lucide-react'] },
-      },
-    },
+    // Bundle unique : un découpage manuel (recharts / react) cassait l'ordre de chargement de React en production.
+    // recharts (+ d3) dépasse 500 kB minifié.
+    chunkSizeWarningLimit: 900,
   },
 });
