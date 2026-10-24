@@ -19,7 +19,8 @@ const change = (cur, prev) => (prev ? (cur - prev) / Math.abs(prev) : NaN);
 
 const PERIOD_KEY = 'mabourse-period';
 const CUSTOM_KEY = 'mabourse-period-custom';
-const HIDE_KEY = 'mabourse-hide-balance';
+const HIDE_KEY = 'mabourse-hide-private';
+const PRIVATE_SERIES = ['balance', 'income'];
 const readPeriod = () => {
   try {
     const k = localStorage.getItem(PERIOD_KEY);
@@ -51,7 +52,7 @@ const SERIES = [
 ];
 
 /** Boutons d'affichage des séries (au moins une reste active). */
-function SeriesToggle({ visible, onToggle, totals, hideBalance }) {
+function SeriesToggle({ visible, onToggle, totals, masked = [] }) {
   const colors = seriesColors(useChartTheme());
   return (
     <div className="flex flex-wrap gap-2">
@@ -74,7 +75,7 @@ function SeriesToggle({ visible, onToggle, totals, hideBalance }) {
               style={{ background: colors[key], opacity: on ? 1 : 0.35 }}
             />
             {label}
-            <span className={`serif text-[14px] ${on ? '' : 'opacity-60'}`}><Amount value={totals[key]} hidden={key === 'balance' && hideBalance} /></span>
+            <span className={`serif text-[14px] ${on ? '' : 'opacity-60'}`}><Amount value={totals[key]} hidden={masked.includes(key)} /></span>
           </button>
         );
       })}
@@ -98,19 +99,30 @@ export default function Dashboard({ onEdit }) {
     store(CUSTOM_KEY, JSON.stringify(next));
     choosePeriod('custom');
   };
-  // Solde masqué (confidentialité), mémorisé sur l'appareil
-  const [hideBalance, setHideBalance] = useState(() => {
+  // Solde, revenus et cash flow masqués par défaut (confidentialité) ; le choix est mémorisé sur l'appareil
+  const [hidePrivate, setHidePrivate] = useState(() => {
     try {
-      return localStorage.getItem(HIDE_KEY) === '1';
+      return localStorage.getItem(HIDE_KEY) !== '0';
     } catch {
-      return false;
+      return true;
     }
   });
-  const toggleBalance = () =>
-    setHideBalance((h) => {
+  const togglePrivate = () =>
+    setHidePrivate((h) => {
       store(HIDE_KEY, h ? '0' : '1');
       return !h;
     });
+  const eyeButton = (
+    <button
+      type="button"
+      onClick={togglePrivate}
+      className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 transition-all duration-300 ease-out hover:bg-sand/50 hover:text-ink-900 dark:hover:bg-white/[0.05] dark:hover:text-ink-50"
+      aria-label={hidePrivate ? 'Afficher les montants' : 'Masquer les montants'}
+      title={hidePrivate ? 'Afficher les montants' : 'Masquer les montants'}
+    >
+      {hidePrivate ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
+    </button>
+  );
   const [visible, setVisible] = useState({ balance: true, income: false, expense: false });
   const toggleSeries = (key) =>
     setVisible((v) => {
@@ -234,28 +246,32 @@ export default function Dashboard({ onEdit }) {
           icon={Wallet}
           tint="#CC5A37"
           hint={s.accs.map((a) => a.name).join(' · ')}
-          hidden={hideBalance}
-          action={
-            <button
-              type="button"
-              onClick={toggleBalance}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 transition-all duration-300 ease-out hover:bg-sand/50 hover:text-ink-900 dark:hover:bg-white/[0.05] dark:hover:text-ink-50"
-              aria-label={hideBalance ? 'Afficher le solde' : 'Masquer le solde'}
-              title={hideBalance ? 'Afficher le solde' : 'Masquer le solde'}
-            >
-              {hideBalance ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
-            </button>
-          }
+          hidden={hidePrivate}
+          action={eyeButton}
         />
-        <KpiCard label="Cash flow" value={s.cur.net} icon={Scale} tint="#D97706" trend={trend('net')} trendLabel={period.vs} hint={period.label} delay={60} />
+        {/* Le cash flow (revenus − dépenses) révèle les revenus : masqué avec eux */}
+        <KpiCard
+          label="Cash flow"
+          value={s.cur.net}
+          icon={Scale}
+          tint="#D97706"
+          trend={hidePrivate ? NaN : trend('net')}
+          trendLabel={period.vs}
+          hint={period.label}
+          hidden={hidePrivate}
+          action={eyeButton}
+          delay={60}
+        />
         <KpiCard
           label="Revenus"
           value={s.cur.income}
           icon={ArrowDownLeft}
           tint="#6F7F55"
-          trend={trend('income')}
+          trend={hidePrivate ? NaN : trend('income')}
           trendLabel={period.vs}
           hint={period.label}
+          hidden={hidePrivate}
+          action={eyeButton}
           delay={120}
           className="col-span-2 xl:col-span-1"
         />
@@ -266,14 +282,20 @@ export default function Dashboard({ onEdit }) {
           title="Évolution du solde"
           subtitle={
             <span>
-              <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span> · {period.label}
+              {/* Variation du solde = cash flow : masquée avec les montants privés */}
+              {hidePrivate ? (
+                <span>••••••</span>
+              ) : (
+                <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span>
+              )}{' '}
+              · {period.label}
             </span>
           }
         >
           <div className="-mt-1 mb-4">
-            <SeriesToggle visible={visible} onToggle={toggleSeries} totals={s.totals} hideBalance={hideBalance} />
+            <SeriesToggle visible={visible} onToggle={toggleSeries} totals={s.totals} masked={hidePrivate ? PRIVATE_SERIES : []} />
           </div>
-          <BalanceChart data={s.series} visible={visible} hideBalance={hideBalance} height={300} />
+          <BalanceChart data={s.series} visible={visible} masked={hidePrivate ? PRIVATE_SERIES : []} height={300} />
         </Card>
 
         <Card title="Top catégories" subtitle={`Dépenses · ${period.label}`}>
