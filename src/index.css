@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  body {
+    @apply bg-cream text-ink-900 dark:bg-night dark:text-ink-100;
+    min-height: 100vh;
+  }
+  /* Lumière chaude, très diffuse */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(700px 420px at 90% -10%, rgba(218, 119, 86, 0.08), transparent 70%),
+      radial-gradient(600px 420px at -10% 110%, rgba(217, 119, 6, 0.05), transparent 70%);
+  }
+  .dark body::before {
+    background:
+      radial-gradient(700px 420px at 90% -10%, rgba(218, 119, 86, 0.10), transparent 70%),
+      radial-gradient(600px 420px at -10% 110%, rgba(217, 119, 6, 0.05), transparent 70%);
+  }
+  .dark {
+    color-scheme: dark;
+  }
+  ::selection {
+    background: rgba(204, 90, 55, 0.18);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply rounded-2xl border border-sand-line bg-white/65 shadow-soft backdrop-blur-md
+      transition-all duration-300 ease-out
+      dark:border-night-line dark:bg-night-card/80 dark:shadow-none;
+  }
+  .glass-hover {
+    @apply hover:-translate-y-px hover:shadow-lift dark:hover:border-ink-600;
+  }
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-[0.1em] text-ink-500 dark:text-ink-400;
+  }
+  .serif {
+    @apply font-serif font-normal tracking-[-0.015em];
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .input {
+    @apply w-full rounded-xl border border-sand-line bg-white/70 px-4 py-3 text-[15px] outline-none
+      transition-all duration-300 ease-out placeholder:text-ink-400
+      focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/10
+      dark:border-night-line dark:bg-white/[0.03] dark:focus:bg-white/[0.05];
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium
+      transition-all duration-300 ease-out active:scale-[0.98] disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-ink-900 text-cream hover:bg-accent dark:bg-cream dark:text-ink-900 dark:hover:bg-accent-soft dark:hover:text-white;
+  }
+  .btn-ghost {
+    @apply btn text-ink-500 hover:bg-sand/50 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-white/[0.05] dark:hover:text-ink-50;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border border-sand-line bg-ink-100/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-500
+      dark:border-night-line dark:bg-white/[0.04] dark:text-ink-400;
+  }
+}
+
+/* Recharts : retirer le contour de focus */
+.recharts-wrapper *:focus {
+  outline: none;
+}
+
+/* Barre de défilement discrète */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 138, 132, 0.28);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
