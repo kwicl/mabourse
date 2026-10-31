@@ -165,7 +165,7 @@ export default function TransactionForm({ open, onClose, initial }) {
               <Trash2 size={16} />
             </button>
           )}
-          <button type="submit" disabled={saving} className="btn-primary flex-1 !py-3">
+          <button type="submit" disabled={saving} className="btn-primary ai-glow flex-1 !py-3">
             <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
           </button>
         </div>

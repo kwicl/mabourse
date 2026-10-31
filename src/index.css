@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes glow-spin {
+  to {
+    --glow-angle: 360deg;
+  }
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -75,6 +86,38 @@
   .badge {
     @apply inline-flex items-center gap-1 rounded-full border border-sand-line bg-ink-100/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-500
       dark:border-night-line dark:bg-white/[0.04] dark:text-ink-400;
+  }
+  /* Lueur multicolore animée (style Gemini) autour d'un bouton d'action */
+  .ai-glow {
+    position: relative;
+  }
+  .ai-glow::before,
+  .ai-glow::after {
+    content: '';
+    position: absolute;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: 2px;
+    background: conic-gradient(from var(--glow-angle), #4285f4, #9b72cb, #d96570, #f4a13a, #4285f4);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation: glow-spin 3.5s linear infinite;
+  }
+  .ai-glow::before {
+    inset: 0;
+  }
+  .ai-glow::after {
+    inset: -3px;
+    padding: 5px;
+    filter: blur(7px);
+    opacity: 0.85;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ai-glow::before,
+    .ai-glow::after {
+      animation: none;
+    }
   }
 }
 

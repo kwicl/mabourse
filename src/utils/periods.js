@@ -2,6 +2,7 @@ import { todayISO } from './format';
 
 /** Périodes du sélecteur global du tableau de bord. */
 export const PERIODS = [
+  { key: 'week', label: 'Semaine', vs: 'vs semaine dernière' },
   { key: 'month', label: 'Ce mois', vs: 'vs mois dernier' },
   { key: 'lastMonth', label: 'Mois dernier', vs: 'vs mois précédent' },
   { key: '3m', label: '3 mois', vs: 'vs 3 mois précédents', months: 3 },
@@ -53,6 +54,16 @@ export function periodRange(key, transactions = [], custom = null) {
         to,
         prevFrom: iso(addDays(at(from), -days)),
         prevTo: iso(addDays(at(from), -1)),
+      };
+    }
+    case 'week': {
+      // Semaine en cours : lundi → aujourd'hui, comparée à la semaine précédente complète (lun → dim)
+      const monday = addDays(today, -((today.getDay() + 6) % 7));
+      return {
+        from: iso(monday),
+        to: iso(today),
+        prevFrom: iso(addDays(monday, -7)),
+        prevTo: iso(addDays(monday, -1)),
       };
     }
     case 'lastMonth':

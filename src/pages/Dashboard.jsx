@@ -169,30 +169,34 @@ export default function Dashboard({ onEdit }) {
           <Segmented value={periodKey} onChange={choosePeriod} options={PRESETS} />
         </div>
         <div
-          className={`flex items-center gap-2 rounded-full border p-1 pl-4 transition-all duration-300 ease-out ${
+          className={`grid grid-cols-1 gap-1 rounded-2xl border p-2 transition-all duration-300 ease-out min-[420px]:grid-cols-2 sm:flex sm:items-center sm:gap-2 sm:rounded-full sm:p-1 sm:pl-4 ${
             periodKey === 'custom'
               ? 'border-accent/40 bg-white shadow-soft dark:bg-white/[0.06]'
               : 'border-sand-line bg-ink-100/70 dark:border-night-line dark:bg-white/[0.03]'
           }`}
         >
-          <span className="label">Du</span>
-          <input
-            type="date"
-            value={r.from}
-            max={r.to}
-            onChange={(e) => chooseDate('from', e.target.value)}
-            className="min-w-0 flex-1 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 dark:focus:bg-white/[0.05]"
-            aria-label="Date de début"
-          />
-          <span className="label">Au</span>
-          <input
-            type="date"
-            value={r.to}
-            min={r.from}
-            onChange={(e) => chooseDate('to', e.target.value)}
-            className="min-w-0 flex-1 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 dark:focus:bg-white/[0.05]"
-            aria-label="Date de fin"
-          />
+          <label className="flex min-w-0 items-center gap-2 pl-2 sm:pl-0">
+            <span className="label shrink-0">Du</span>
+            <input
+              type="date"
+              value={r.from}
+              max={r.to}
+              onChange={(e) => chooseDate('from', e.target.value)}
+              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 sm:w-auto dark:focus:bg-white/[0.05]"
+              aria-label="Date de début"
+            />
+          </label>
+          <label className="flex min-w-0 items-center gap-2 pl-2 sm:pl-0">
+            <span className="label shrink-0">Au</span>
+            <input
+              type="date"
+              value={r.to}
+              min={r.from}
+              onChange={(e) => chooseDate('to', e.target.value)}
+              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 sm:w-auto dark:focus:bg-white/[0.05]"
+              aria-label="Date de fin"
+            />
+          </label>
         </div>
       </div>
 

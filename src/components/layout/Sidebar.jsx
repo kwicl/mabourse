@@ -34,7 +34,7 @@ export default function Sidebar({ route, onAdd, theme, onToggleTheme }) {
         <Logo />
       </div>
 
-      <button onClick={onAdd} className="btn w-full bg-accent !py-3 text-white shadow-glow hover:bg-[#B84E2E] hover:shadow-lift">
+      <button onClick={onAdd} className="btn ai-glow w-full bg-accent !py-3 text-white shadow-glow hover:bg-[#B84E2E] hover:shadow-lift">
         <Plus size={17} /> Nouvelle opération
       </button>
 
@@ -84,7 +84,7 @@ export function MobileNav({ route, onAdd }) {
       ))}
       <button
         onClick={onAdd}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-glow transition-all duration-300 ease-out active:scale-95"
+        className="ai-glow flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-glow transition-all duration-300 ease-out active:scale-95"
         aria-label="Nouvelle opération"
       >
         <Plus size={20} />
