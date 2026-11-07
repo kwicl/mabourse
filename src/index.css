@@ -121,7 +121,7 @@
     position: absolute;
     border-radius: inherit;
     pointer-events: none;
-    background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570, #4285f4, #9b72cb, #d96570, #4285f4) 0% 0% / 200% 100%;
+    background: linear-gradient(90deg, #4285f4, #a3e635, #d96570, #4285f4, #a3e635, #d96570, #4285f4) 0% 0% / 200% 100%;
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
