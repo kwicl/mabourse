@@ -2,6 +2,7 @@ import { todayISO } from './format';
 
 /** Périodes du sélecteur global du tableau de bord. */
 export const PERIODS = [
+  { key: 'today', label: "Aujourd'hui", vs: 'vs hier' },
   { key: 'week', label: 'Semaine', vs: 'vs semaine dernière' },
   { key: 'month', label: 'Ce mois', vs: 'vs mois dernier' },
   { key: 'lastMonth', label: 'Mois dernier', vs: 'vs mois précédent' },
@@ -56,6 +57,15 @@ export function periodRange(key, transactions = [], custom = null) {
         prevTo: iso(addDays(at(from), -1)),
       };
     }
+    case 'today':
+      // Un seul jour : les graphiques cumulés montrent les 7 derniers jours (chartFrom)
+      return {
+        from: iso(today),
+        to: iso(today),
+        prevFrom: iso(addDays(today, -1)),
+        prevTo: iso(addDays(today, -1)),
+        chartFrom: iso(addDays(today, -6)),
+      };
     case 'week': {
       // Semaine en cours : lundi → aujourd'hui, comparée à la semaine précédente complète (lun → dim)
       const monday = addDays(today, -((today.getDay() + 6) % 7));

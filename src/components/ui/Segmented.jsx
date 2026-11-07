@@ -13,7 +13,9 @@ export default function Segmented({ options, value, onChange, size = 'md' }) {
             className={`${pad} shrink-0 whitespace-nowrap rounded-full font-medium transition-all duration-300 ease-out ${
               active
                 ? 'bg-white text-ink-900 shadow-soft dark:bg-white/[0.1] dark:text-ink-50'
-                : 'text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100'
+                : o.soft
+                  ? 'bg-sand/70 text-ink-700 hover:text-ink-900 dark:bg-white/[0.06] dark:text-ink-200 dark:hover:text-ink-50'
+                  : 'text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100'
             }`}
           >
             {o.label}

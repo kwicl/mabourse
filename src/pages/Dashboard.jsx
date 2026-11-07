@@ -45,7 +45,7 @@ const store = (k, v) => {
     /* stockage indisponible */
   }
 };
-const PRESETS = PERIODS.filter((p) => p.key !== 'custom').map((p) => ({ value: p.key, label: p.label }));
+const PRESETS = PERIODS.filter((p) => p.key !== 'custom').map((p) => ({ value: p.key, label: p.label, soft: p.key === 'today' }));
 
 const SERIES = [
   { key: 'balance', label: 'Solde' },
@@ -152,7 +152,7 @@ export default function Dashboard({ onEdit }) {
   const s = useMemo(() => {
     const cur = totalsBetween(transactions, r.from, r.to);
     const prev = r.prevFrom ? totalsBetween(transactions, r.prevFrom, r.prevTo) : null;
-    const series = seriesBetween(accounts, transactions, r.from, r.to);
+    const series = seriesBetween(accounts, transactions, r.chartFrom ?? r.from, r.to);
     const balance = totalBalance(accounts, transactions);
     const endBalance = series[series.length - 1]?.balance ?? balance;
     return {
@@ -169,6 +169,8 @@ export default function Dashboard({ onEdit }) {
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
     };
   }, [transactions, categories, accounts, m, r]);
+  // Un seul jour : les courbes couvrent les 7 derniers jours
+  const chartLabel = r.chartFrom ? '7 derniers jours' : period.label;
   const trend = (k) => (s.prev ? change(s.cur[k], s.prev[k]) : NaN);
 
   const spentBy = Object.fromEntries(s.cats.map((c) => [c.id, c.value]));
@@ -227,7 +229,7 @@ export default function Dashboard({ onEdit }) {
               ) : (
                 <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span>
               )}{' '}
-              · {period.label}
+              · {chartLabel}
             </span>
           }
         >
@@ -266,7 +268,7 @@ export default function Dashboard({ onEdit }) {
         title="Tendance cumulée"
         subtitle={
           <span>
-            Revenus, dépenses et épargne jour par jour · {period.label}
+            Revenus, dépenses et épargne jour par jour · {chartLabel}
           </span>
         }
       >
