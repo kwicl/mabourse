@@ -4,7 +4,7 @@ import { useChartTheme } from '../../hooks/useChartTheme';
 import { compact, dayLabel } from '../../utils/format';
 
 // Graduations "rondes" (1, 2, 2.5, 5 × 10^n) couvrant [min, max]
-function niceTicks(min, max, from0 = false) {
+export function niceTicks(min, max, from0 = false) {
   if (from0) min = 0;
   const raw = ((max - min) * 1.3 || 1000) / 4;
   const mag = 10 ** Math.floor(Math.log10(raw));
@@ -16,7 +16,7 @@ function niceTicks(min, max, from0 = false) {
 
 /** Couleur de chaque série (le solde suit l'encre du thème). */
 export function seriesColors(t) {
-  return { balance: t.dark ? '#E6E0D4' : '#33302D', income: t.income, expense: t.expense };
+  return { balance: t.dark ? '#E6E0D4' : '#33302D', income: t.income, expense: t.expense, saving: t.accent };
 }
 
 /**

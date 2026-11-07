@@ -11,3 +11,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </FinanceProvider>
   </React.StrictMode>,
 );
+
+// Fonctionnement hors-ligne : met l'app en cache pour qu'elle s'ouvre sans connexion
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

@@ -20,7 +20,7 @@ function Row({ t, onSelect }) {
   return (
     <button
       onClick={() => onSelect?.(t)}
-      className="group flex w-full items-center gap-3.5 rounded-xl px-2.5 py-2.5 text-left transition-all duration-300 ease-out hover:bg-sand/40 dark:hover:bg-white/[0.03]"
+      className="group flex w-full items-start gap-3.5 rounded-xl px-2.5 py-2.5 text-left transition-all duration-300 ease-out hover:bg-sand/40 dark:hover:bg-white/[0.03]"
     >
       {isTransfer ? (
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink-200/50 text-ink-500 ring-1 ring-inset ring-black/[0.03] dark:bg-white/[0.05]">
@@ -30,10 +30,10 @@ function Row({ t, onSelect }) {
         <CategoryIcon icon={cat?.icon} color={cat?.color} />
       )}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14px] font-medium">{title}</span>
-        {sub && <span className="block truncate text-[12.5px] text-ink-500 dark:text-ink-400">{sub}</span>}
+        <span className="block break-words text-[14px] font-medium leading-snug">{title}</span>
+        {sub && <span className="block break-words text-[12.5px] leading-snug text-ink-500 dark:text-ink-400">{sub}</span>}
       </span>
-      <span className={`num text-[14px] font-medium transition-transform duration-300 ease-out group-hover:-translate-x-0.5 ${color}`}>
+      <span className={`num shrink-0 whitespace-nowrap pt-0.5 text-[14px] font-medium transition-transform duration-300 ease-out group-hover:-translate-x-0.5 ${color}`}>
         {sign}
         <Amount value={t.amount} />
       </span>

@@ -269,6 +269,8 @@ function createRow_(name, data) {
   var headers = SCHEMA[name];
   data = data || {};
   if (!data.id) data.id = Utilities.getUuid();
+  // Idempotent : une relecture hors-ligne ne crée pas de doublon
+  try { findRow_(sh, data.id); return updateRow_(name, data.id, data); } catch (e) { /* absent : création */ }
   if (name === 'Transactions' && !data.createdAt) data.createdAt = new Date().toISOString();
   sh.appendRow(headers.map(function (h) { return data[h] !== undefined ? data[h] : ''; }));
   return toObject_(headers, headers.map(function (h) { return data[h] !== undefined ? data[h] : ''; }));

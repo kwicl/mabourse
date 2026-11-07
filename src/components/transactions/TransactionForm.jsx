@@ -106,7 +106,7 @@ export default function TransactionForm({ open, onClose, initial }) {
         {form.type !== 'transfer' ? (
           <div>
             <span className="label mb-2 block">Catégorie</span>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2 min-[400px]:grid-cols-4">
               {cats.map((c) => {
                 const active = form.categoryId === c.id;
                 return (
@@ -114,12 +114,12 @@ export default function TransactionForm({ open, onClose, initial }) {
                     type="button"
                     key={c.id}
                     onClick={() => setForm((f) => ({ ...f, categoryId: c.id }))}
-                    className={`flex flex-col items-center gap-1.5 rounded-2xl p-2 text-[11px] font-medium transition ${
+                    className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl p-2 text-[12px] font-medium leading-tight transition ${
                       active ? 'bg-white shadow-soft ring-1 ring-accent/50 dark:bg-white/[0.06]' : 'hover:bg-sand/40 dark:hover:bg-white/[0.03]'
                     }`}
                   >
                     <CategoryIcon icon={c.icon} color={c.color} size={38} />
-                    <span className="w-full truncate text-center">{c.name}</span>
+                    <span className="w-full break-words text-center [overflow-wrap:anywhere]">{c.name}</span>
                   </button>
                 );
               })}
@@ -127,12 +127,12 @@ export default function TransactionForm({ open, onClose, initial }) {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1.5">
+        <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+          <label className="flex min-w-0 flex-col gap-1.5">
             <span className="label">Date</span>
             <input type="date" value={form.date} onChange={set('date')} className="input" required />
           </label>
-          <label className="flex flex-col gap-1.5">
+          <label className="flex min-w-0 flex-col gap-1.5">
             <span className="label">{form.type === 'transfer' ? 'Depuis' : 'Compte'}</span>
             <select value={form.accountId} onChange={set('accountId')} className="input">
               {accounts.map((a) => (
@@ -141,7 +141,7 @@ export default function TransactionForm({ open, onClose, initial }) {
             </select>
           </label>
           {form.type === 'transfer' && (
-            <label className="col-span-2 flex flex-col gap-1.5">
+            <label className="flex min-w-0 flex-col gap-1.5 min-[420px]:col-span-2">
               <span className="label">Vers</span>
               <select value={form.toAccountId} onChange={set('toAccountId')} className="input">
                 {accounts.map((a) => (
@@ -165,7 +165,7 @@ export default function TransactionForm({ open, onClose, initial }) {
               <Trash2 size={16} />
             </button>
           )}
-          <button type="submit" disabled={saving} className="btn-primary ai-glow flex-1 !py-3">
+          <button type="submit" disabled={saving} className="btn ai-glow flex-1 !py-3">
             <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
           </button>
         </div>

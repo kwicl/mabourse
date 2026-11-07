@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@property --glow-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes glow-spin {
+/* Bordure lumineuse (style Google AI Studio) : le dégradé glisse de gauche à droite en boucle.
+   Image = 2 périodes ; décalage de 100% = exactement 1 période -> boucle sans couture. */
+@keyframes glow-slide {
+  from {
+    background-position: 0% 0;
+  }
   to {
-    --glow-angle: 360deg;
+    background-position: 100% 0;
   }
 }
 
@@ -41,6 +41,25 @@
   }
   .dark {
     color-scheme: dark;
+  }
+  /* iOS/Android : les champs date/select ont une largeur intrinsèque qui déborde de la grille */
+  input[type='date'],
+  input[type='time'],
+  select {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  input[type='date'] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-height: 48px;
+    text-align: left;
+  }
+  input[type='date']::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.4em;
   }
   ::selection {
     background: rgba(204, 90, 55, 0.18);
@@ -87,9 +106,14 @@
     @apply inline-flex items-center gap-1 rounded-full border border-sand-line bg-ink-100/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-500
       dark:border-night-line dark:bg-white/[0.04] dark:text-ink-400;
   }
-  /* Lueur multicolore animée (style Gemini) autour d'un bouton d'action */
+  /* Bouton sombre #1e1f20 + bordure dégradée 2px bleu-violet-rose + halo diffus animé (CSS pur, 60 FPS) */
   .ai-glow {
     position: relative;
+    isolation: isolate;
+    background: #1e1f20;
+    color: #fff;
+    transform: translateZ(0);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
   }
   .ai-glow::before,
   .ai-glow::after {
@@ -97,21 +121,33 @@
     position: absolute;
     border-radius: inherit;
     pointer-events: none;
-    padding: 2px;
-    background: conic-gradient(from var(--glow-angle), #4285f4, #9b72cb, #d96570, #f4a13a, #4285f4);
+    background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570, #4285f4, #9b72cb, #d96570, #4285f4) 0% 0% / 200% 100%;
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    animation: glow-spin 3.5s linear infinite;
+    animation: glow-slide 3s linear infinite;
+    will-change: background-position;
   }
+  /* Bordure fine 2px */
   .ai-glow::before {
     inset: 0;
+    padding: 2px;
   }
+  /* Halo diffus */
   .ai-glow::after {
-    inset: -3px;
-    padding: 5px;
-    filter: blur(7px);
-    opacity: 0.85;
+    inset: -4px;
+    padding: 6px;
+    filter: blur(9px);
+    opacity: 0.5;
+    z-index: -1;
+    transition: opacity 0.35s ease-out;
+  }
+  .ai-glow:hover:not(:disabled)::after {
+    opacity: 1;
+  }
+  .ai-glow:disabled::before,
+  .ai-glow:disabled::after {
+    animation-play-state: paused;
   }
   @media (prefers-reduced-motion: reduce) {
     .ai-glow::before,

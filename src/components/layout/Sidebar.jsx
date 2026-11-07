@@ -13,9 +13,20 @@ export const NAV = [
 ];
 
 function SyncBadge() {
-  const { remote, syncing, error, refresh } = useFinance();
-  const dot = error ? 'bg-expense' : syncing ? 'bg-ochre animate-pulse' : remote ? 'bg-income' : 'bg-ink-300';
-  const text = error ? 'Erreur de synchro' : remote ? (syncing ? 'Synchronisation…' : 'Google Sheets') : 'Données locales';
+  const { remote, syncing, error, refresh, online, pending } = useFinance();
+  const dot = !online ? 'bg-ochre' : error ? 'bg-expense' : syncing || pending ? 'bg-ochre animate-pulse' : remote ? 'bg-income' : 'bg-ink-300';
+  const waiting = pending ? ` · ${pending} en attente` : '';
+  const text = !remote
+    ? 'Données locales'
+    : !online
+      ? `Hors ligne${waiting}`
+      : error
+        ? 'Erreur de synchro'
+        : syncing
+          ? 'Synchronisation…'
+          : pending
+            ? `${pending} en attente`
+            : 'Google Sheets';
   return (
     <button onClick={refresh} className="btn-ghost w-full justify-between !rounded-xl !px-3 text-xs" title={error || 'Actualiser'}>
       <span className="flex items-center gap-2">
@@ -34,7 +45,7 @@ export default function Sidebar({ route, onAdd, theme, onToggleTheme }) {
         <Logo />
       </div>
 
-      <button onClick={onAdd} className="btn ai-glow w-full bg-accent !py-3 text-white shadow-glow hover:bg-[#B84E2E] hover:shadow-lift">
+      <button onClick={onAdd} className="btn ai-glow w-full !py-3">
         <Plus size={17} /> Nouvelle opération
       </button>
 
@@ -84,7 +95,7 @@ export function MobileNav({ route, onAdd }) {
       ))}
       <button
         onClick={onAdd}
-        className="ai-glow flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-glow transition-all duration-300 ease-out active:scale-95"
+        className="ai-glow flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ease-out active:scale-95"
         aria-label="Nouvelle opération"
       >
         <Plus size={20} />

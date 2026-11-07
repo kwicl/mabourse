@@ -39,24 +39,42 @@ export function uid() {
 /* Remote (Google Apps Script)                                          */
 /* ------------------------------------------------------------------ */
 
+/** fetch avec délai maximum : une connexion lente ou coupée ne bloque jamais l'app. */
+async function fetchT(url, opts = {}, ms = 20000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...opts, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** true si l'échec vient du réseau / du serveur (à réessayer plus tard), false si la requête est refusée. */
+export function isRetryable(e) {
+  if (e?.code === 'unauthorized') return false;
+  if (e?.status === undefined) return true; // fetch échoué, délai dépassé, hors-ligne
+  return e.status >= 500 || e.status === 429 || e.status === 408;
+}
+
 async function remoteGet(params) {
   const { sheetsUrl, sheetsToken, proxyUrl } = getConfig();
   if (usesProxy()) {
-    const res = await fetch(`${proxyUrl}?${new URLSearchParams(params)}`, {
+    const res = await fetchT(`${proxyUrl}?${new URLSearchParams(params)}`, {
       headers: { 'x-app-password': getPassword() },
     });
     return unwrap(res);
   }
   const url = new URL(sheetsUrl);
   Object.entries({ ...params, token: sheetsToken }).forEach(([k, v]) => url.searchParams.set(k, v));
-  const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+  const res = await fetchT(url.toString(), { method: 'GET', redirect: 'follow' });
   return unwrap(res);
 }
 
 async function remotePost(body) {
   const { sheetsUrl, sheetsToken, proxyUrl } = getConfig();
   if (usesProxy()) {
-    const res = await fetch(proxyUrl, {
+    const res = await fetchT(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-app-password': getPassword() },
       body: JSON.stringify(body),
@@ -64,7 +82,7 @@ async function remotePost(body) {
     return unwrap(res);
   }
   // text/plain évite la requête preflight CORS, non supportée par Apps Script.
-  const res = await fetch(sheetsUrl, {
+  const res = await fetchT(sheetsUrl, {
     method: 'POST',
     redirect: 'follow',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -82,6 +100,8 @@ async function unwrap(res) {
   }
   if (!res.ok || !json?.ok) {
     const err = new Error(json?.error || `HTTP ${res.status}`);
+    // Corps non JSON (page d'erreur Google, coupure) : on réessaiera plus tard
+    err.status = json || res.status >= 400 ? res.status : undefined;
     err.code = json?.code || (res.status === 401 ? 'unauthorized' : undefined);
     throw err;
   }

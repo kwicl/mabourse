@@ -12,6 +12,7 @@ const DAY = {
   balance: (d) => (d.dayNet != null ? signedMoney(d.dayNet) : null),
   income: (d) => (d.dayIncome ? `+${money(d.dayIncome)}` : null),
   expense: (d) => (d.dayExpense ? `−${money(d.dayExpense)}` : null),
+  saving: (d) => (d.dayIncome || d.dayExpense ? signedMoney(d.dayIncome - d.dayExpense) : null),
 };
 
 /** Infobulle commune à tous les graphiques. */
