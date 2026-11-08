@@ -7,7 +7,7 @@ import { useFinance } from '../../context/FinanceContext';
 import SourceSyncButton from '../SourceSyncButton';
 
 export const NAV = [
-  { id: 'dashboard', label: 'Tableau de bord', short: 'Accueil', icon: LayoutGrid },
+  { id: 'dashboard', label: 'MiZanya', short: 'Accueil', icon: LayoutGrid },
   { id: 'transactions', label: 'Opérations', short: 'Opérations', icon: ArrowLeftRight },
   { id: 'budgets', label: 'Budgets', short: 'Budgets', icon: Target },
   { id: 'stats', label: 'Statistiques', short: 'Stats', icon: BarChart3 },
@@ -47,7 +47,7 @@ export default function Sidebar({ route, onAdd, theme, onToggleTheme }) {
         <Logo />
       </div>
 
-      <button onClick={onAdd} className="btn ai-glow w-full !py-3">
+      <button onClick={onAdd} className="btn water-glow w-full !py-3">
         <Plus size={17} /> Nouvelle opération
       </button>
 
@@ -100,7 +100,7 @@ export function MobileNav({ route, onAdd }) {
       ))}
       <button
         onClick={onAdd}
-        className="ai-glow flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ease-out active:scale-95"
+        className="water-glow water-blob flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ease-out active:scale-95"
         aria-label="Nouvelle opération"
       >
         <Plus size={20} />

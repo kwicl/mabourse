@@ -45,6 +45,7 @@ export const BASE_VARS = {
   '--mb-accent': rgbTriplet(c.accent.DEFAULT),
   '--mb-accent-soft': rgbTriplet(c.accent.soft),
   '--mb-ink': rgbTriplet(c.ink[50]),
+  '--mb-ink-900': rgbTriplet(c.ink[900]),
   '--mb-night': rgbTriplet(c.night.DEFAULT),
   '--mb-night-card': rgbTriplet(c.night.card),
 };

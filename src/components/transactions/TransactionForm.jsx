@@ -87,6 +87,20 @@ export default function TransactionForm({ open, onClose, initial }) {
   return (
     <Modal open={open} onClose={onClose} title={initial ? "Modifier l'opération" : 'Nouvelle opération'}>
       <form onSubmit={submit} className="flex flex-col gap-5">
+        {/* Validation en haut de la fenêtre de saisie */}
+        <div className="flex gap-2">
+          {initial && (
+            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-expense" aria-label="Supprimer">
+              <Trash2 size={16} />
+            </button>
+          )}
+          <button type="submit" disabled={saving} className="btn water-glow flex-1 !py-3">
+            <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
+          </button>
+        </div>
+
+        {err && <p className="text-sm text-expense">{err}</p>}
+
         <div className="flex justify-center">
           <Segmented options={TYPES} value={form.type} onChange={(v) => setForm((f) => ({ ...f, type: v, categoryId: '' }))} />
         </div>
@@ -157,18 +171,6 @@ export default function TransactionForm({ open, onClose, initial }) {
           <input value={form.note} onChange={set('note')} placeholder="Facultatif" className="input" />
         </label>
 
-        {err && <p className="text-sm text-expense">{err}</p>}
-
-        <div className="flex gap-2">
-          {initial && (
-            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-expense" aria-label="Supprimer">
-              <Trash2 size={16} />
-            </button>
-          )}
-          <button type="submit" disabled={saving} className="btn ai-glow flex-1 !py-3">
-            <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
-          </button>
-        </div>
       </form>
     </Modal>
   );

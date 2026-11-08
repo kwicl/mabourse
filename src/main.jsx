@@ -6,6 +6,7 @@ import './index.css';
 // Surcouche optionnelle (inactive tant que <html> n'a pas la classe « theme-hologram »)
 import './hologram/useHologram';
 import './hologram/hologram.css';
+import './hologram/water-button.js';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
