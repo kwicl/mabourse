@@ -128,12 +128,12 @@ export default function TransactionForm({ open, onClose, initial }) {
                     type="button"
                     key={c.id}
                     onClick={() => setForm((f) => ({ ...f, categoryId: c.id }))}
-                    className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl p-2 text-[12px] font-medium leading-tight transition ${
+                    className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] transition ${
                       active ? 'bg-white shadow-soft ring-1 ring-accent/50 dark:bg-white/[0.06]' : 'hover:bg-sand/40 dark:hover:bg-white/[0.03]'
                     }`}
                   >
                     <CategoryIcon icon={c.icon} color={c.color} size={38} />
-                    <span className="w-full break-words text-center [overflow-wrap:anywhere]">{c.name}</span>
+                    <span className="w-full hyphens-auto break-words text-center">{c.name}</span>
                   </button>
                 );
               })}
