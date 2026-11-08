@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { ArrowLeftRight, BarChart3, LayoutGrid, Moon, Plus, RefreshCw, Settings, Sun, Target } from 'lucide-react';
 import Logo from './Logo';
+import NavBubble from '../../hologram/NavBubble';
 import { navigate } from '../../hooks/useHashRoute';
 import { useFinance } from '../../context/FinanceContext';
 import SourceSyncButton from '../SourceSyncButton';
@@ -56,6 +58,7 @@ export default function Sidebar({ route, onAdd, theme, onToggleTheme }) {
             <button
               key={id}
               onClick={() => navigate(id)}
+              aria-current={active ? 'page' : undefined}
               className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all duration-300 ease-out ${
                 active
                   ? 'bg-white text-ink-900 shadow-soft ring-1 ring-sand-line dark:bg-white/[0.06] dark:text-ink-50 dark:shadow-none dark:ring-night-line'
@@ -88,8 +91,10 @@ export default function Sidebar({ route, onAdd, theme, onToggleTheme }) {
 
 export function MobileNav({ route, onAdd }) {
   const items = NAV.filter((n) => n.id !== 'settings');
+  const navRef = useRef(null);
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-full border border-sand-line bg-cream/85 px-2 py-2 shadow-lift backdrop-blur-md dark:border-night-line dark:bg-night-card/85 lg:hidden">
+    <nav ref={navRef} className="nav-bubble-host fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-full border border-sand-line bg-cream/85 px-2 py-2 shadow-lift backdrop-blur-md dark:border-night-line dark:bg-night-card/85 lg:hidden">
+      <NavBubble navRef={navRef} activeId={route} />
       {items.slice(0, 2).map((n) => (
         <MobileItem key={n.id} item={n} active={route === n.id} />
       ))}
@@ -111,6 +116,8 @@ function MobileItem({ item: { id, short, icon: Icon }, active }) {
   return (
     <button
       onClick={() => navigate(id)}
+      data-nav-id={id}
+      aria-current={active ? 'page' : undefined}
       className={`flex flex-col items-center gap-0.5 px-2 text-[10px] font-medium transition-colors duration-300 ${active ? 'text-accent' : 'text-ink-400'}`}
     >
       <Icon size={19} strokeWidth={active ? 2 : 1.6} />

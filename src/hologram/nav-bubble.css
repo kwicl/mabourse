@@ -1,0 +1,105 @@
+/*
+ * Bulle d'eau de la barre de navigation mobile.
+ * Couleurs : uniquement les variables issues de tailwind.config.js (voir palette.js),
+ * en version translucide. Aucune couleur codée en dur.
+ */
+
+/* Onglets au-dessus de la bulle + zone tactile ≥ 44 px */
+.nav-bubble-host > button {
+  position: relative;
+  z-index: 1;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.nav-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 0.25s ease-out;
+}
+.nav-bubble[data-hidden='true'] {
+  opacity: 0;
+}
+
+.nav-bubble__deform {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+.nav-bubble__body {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+  background: rgb(var(--mb-accent) / 0.17);
+  border: 1px solid rgb(var(--mb-accent) / 0.45);
+  box-shadow:
+    inset 0 2px 3px rgb(var(--mb-ink) / 0.45),
+    inset 0 -4px 7px rgb(var(--mb-accent) / 0.3);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  will-change: transform;
+  animation:
+    nav-bubble-breathe 3s ease-in-out infinite,
+    nav-bubble-morph 7s ease-in-out infinite;
+}
+
+/* Reflet ovale en haut de la bulle */
+.nav-bubble__shine {
+  position: absolute;
+  top: 6%;
+  left: 16%;
+  width: 36%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(var(--mb-ink) / 0.55), rgb(var(--mb-ink) / 0) 70%);
+  will-change: transform;
+}
+
+@keyframes nav-bubble-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes nav-bubble-morph {
+  0%,
+  100% {
+    border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+  }
+  33% {
+    border-radius: 45% 55% 40% 60% / 55% 45% 55% 45%;
+  }
+  66% {
+    border-radius: 55% 45% 60% 40% / 45% 50% 50% 55%;
+  }
+}
+
+/* Appareil lent : pas de flou ni de morphing de contour */
+.holo-lite .nav-bubble__body {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: nav-bubble-breathe 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-bubble__body {
+    animation: none;
+  }
+  .nav-bubble {
+    transition: none;
+  }
+}
