@@ -1,25 +1,51 @@
 /*
- * Image d'arrière-plan de l'application (public/bg-breathe.jpg).
+ * Image d'arrière-plan de l'application (public/bg-parthenon.jpg).
  * Calque fixe (body::before) : fonctionne aussi sur iOS, où background-attachment: fixed est ignoré.
- * Un voile aux couleurs du thème passe par-dessus l'image pour garder le texte lisible (AA).
+ * Un voile passe par-dessus l'image pour garder le texte lisible (AA).
  * Importé après index.css et hologram.css : remplace leurs halos de body::before.
  */
-body::before {
-  background:
-    linear-gradient(180deg, rgb(var(--mb-ink) / 0.86) 0%, rgb(var(--mb-ink) / 0.78) 45%, rgb(var(--mb-ink) / 0.88) 100%),
-    url('/bg-breathe.jpg') 62% center / cover no-repeat;
+
+/* Tons relevés dans l'image : ciel ardoise, couchant orangé, marbre */
+:root {
+  --pt-slate: 30 38 45;
+  --pt-sunset: 214 118 52;
+  --pt-marble: 238 229 214;
+  --pt-image: url('/bg-parthenon.jpg');
+  --pt-pos: 30% 70%;
 }
 
+/* Clair : voile marbre, plus dense en haut (titre, date) */
+body::before {
+  background:
+    linear-gradient(180deg, rgb(var(--mb-ink) / 0.9) 0%, rgb(var(--pt-marble) / 0.78) 50%, rgb(var(--mb-ink) / 0.86) 100%),
+    var(--pt-image) var(--pt-pos) / cover no-repeat;
+}
+
+/* Sombre : voile ardoise léger, le couchant reste visible */
 .dark body::before {
   background:
-    linear-gradient(180deg, rgb(var(--mb-night) / 0.86) 0%, rgb(var(--mb-night) / 0.74) 45%, rgb(var(--mb-night) / 0.88) 100%),
-    url('/bg-breathe.jpg') 62% center / cover no-repeat;
+    radial-gradient(90% 60% at 100% 100%, rgb(var(--pt-sunset) / 0.18), transparent 70%),
+    linear-gradient(180deg, rgb(var(--pt-slate) / 0.86) 0%, rgb(var(--pt-slate) / 0.7) 25%, rgb(var(--pt-slate) / 0.52) 55%, rgb(var(--pt-slate) / 0.7) 100%),
+    var(--pt-image) var(--pt-pos) / cover no-repeat;
+}
+
+/* Cartes plus translucides en sombre pour laisser voir le décor (le flou existant garde la lisibilité) */
+:root.dark:not(.theme-hologram) .glass {
+  background-color: rgb(var(--pt-slate) / 0.66);
+  border-color: rgb(var(--pt-marble) / 0.1);
+}
+/* Filtres de période, champs date : fond quasi transparent d'origine -> ardoise pour rester lisibles sur le marbre */
+:root.dark:not(.theme-hologram) .dark\:bg-white\/\[0\.03\] {
+  background-color: rgb(var(--pt-slate) / 0.72);
+}
+:root.dark:not(.theme-hologram) .nav-bubble-host {
+  background-color: rgb(var(--pt-slate) / 0.8);
 }
 
 .theme-hologram body::before {
   background:
     radial-gradient(760px 480px at 88% -8%, hsl(var(--holo-violet) / 0.16), transparent 70%),
     radial-gradient(640px 460px at -12% 108%, hsl(var(--holo-cyan) / 0.12), transparent 70%),
-    linear-gradient(180deg, hsl(var(--holo-bg) / 0.86) 0%, hsl(var(--holo-bg) / 0.72) 45%, hsl(var(--holo-bg) / 0.9) 100%),
-    url('/bg-breathe.jpg') 62% center / cover no-repeat;
+    linear-gradient(180deg, hsl(var(--holo-bg) / 0.84) 0%, hsl(var(--holo-bg) / 0.66) 50%, hsl(var(--holo-bg) / 0.88) 100%),
+    var(--pt-image) var(--pt-pos) / cover no-repeat;
 }
