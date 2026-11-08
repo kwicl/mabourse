@@ -17,7 +17,7 @@
 /* Clair : voile marbre, plus dense en haut (titre, date) */
 body::before {
   background:
-    linear-gradient(180deg, rgb(var(--mb-ink) / 0.9) 0%, rgb(var(--pt-marble) / 0.78) 50%, rgb(var(--mb-ink) / 0.86) 100%),
+    linear-gradient(180deg, rgb(var(--mb-ink) / 0.82) 0%, rgb(var(--pt-marble) / 0.6) 50%, rgb(var(--mb-ink) / 0.74) 100%),
     var(--pt-image) var(--pt-pos) / cover no-repeat;
 }
 
@@ -25,7 +25,7 @@ body::before {
 .dark body::before {
   background:
     radial-gradient(90% 60% at 100% 100%, rgb(var(--pt-sunset) / 0.18), transparent 70%),
-    linear-gradient(180deg, rgb(var(--pt-slate) / 0.86) 0%, rgb(var(--pt-slate) / 0.7) 25%, rgb(var(--pt-slate) / 0.52) 55%, rgb(var(--pt-slate) / 0.7) 100%),
+    linear-gradient(180deg, rgb(var(--pt-slate) / 0.78) 0%, rgb(var(--pt-slate) / 0.56) 25%, rgb(var(--pt-slate) / 0.36) 55%, rgb(var(--pt-slate) / 0.56) 100%),
     var(--pt-image) var(--pt-pos) / cover no-repeat;
 }
 
@@ -46,6 +46,6 @@ body::before {
   background:
     radial-gradient(760px 480px at 88% -8%, hsl(var(--holo-violet) / 0.16), transparent 70%),
     radial-gradient(640px 460px at -12% 108%, hsl(var(--holo-cyan) / 0.12), transparent 70%),
-    linear-gradient(180deg, hsl(var(--holo-bg) / 0.84) 0%, hsl(var(--holo-bg) / 0.66) 50%, hsl(var(--holo-bg) / 0.88) 100%),
+    linear-gradient(180deg, hsl(var(--holo-bg) / 0.76) 0%, hsl(var(--holo-bg) / 0.52) 50%, hsl(var(--holo-bg) / 0.8) 100%),
     var(--pt-image) var(--pt-pos) / cover no-repeat;
 }
