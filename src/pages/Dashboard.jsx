@@ -3,7 +3,7 @@ import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Scale, Wallet } from 'lucide-
 import Card from '../components/ui/Card';
 import KpiCard from '../components/KpiCard';
 import BalanceChart, { seriesColors } from '../components/charts/BalanceChart';
-import TrendChart from '../components/charts/TrendChart';
+import DailyChart from '../components/charts/DailyChart';
 import { useChartTheme } from '../hooks/useChartTheme';
 import CategoryDonut from '../components/charts/CategoryDonut';
 import TransactionList from '../components/transactions/TransactionList';
@@ -22,7 +22,7 @@ const PERIOD_KEY = 'mabourse-period';
 const CUSTOM_KEY = 'mabourse-period-custom';
 const HIDE_KEY = 'mabourse-hide-private';
 const PRIVATE_SERIES = ['balance', 'income'];
-const TREND_PRIVATE = ['income', 'saving'];
+const TREND_PRIVATE = ['income'];
 const readPeriod = () => {
   try {
     const k = localStorage.getItem(PERIOD_KEY);
@@ -54,14 +54,18 @@ const SERIES = [
 ];
 
 const TREND_SERIES = [
-  { key: 'income', label: 'Revenus' },
+  { key: 'budget', label: 'Budget / jour' },
   { key: 'expense', label: 'Dépenses' },
-  { key: 'saving', label: 'Épargne' },
+  { key: 'income', label: 'Revenus' },
 ];
+
+// Budget quotidien : total des budgets mensuels réparti sur les jours du mois concerné
+const daysInMonth = (iso) => new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 0).getDate();
 
 /** Boutons d'affichage des séries (au moins une reste active). */
 function SeriesToggle({ visible, onToggle, totals, masked = [], series = SERIES }) {
-  const colors = seriesColors(useChartTheme());
+  const base = seriesColors(useChartTheme());
+  const colors = { ...base, budget: base.balance };
   return (
     <div className="flex flex-wrap gap-2">
       {series.map(({ key, label }) => {
@@ -138,7 +142,7 @@ export default function Dashboard({ onEdit }) {
       return Object.values(next).some(Boolean) ? next : v;
     });
 
-  const [trendVisible, setTrendVisible] = useState({ income: true, expense: true, saving: true });
+  const [trendVisible, setTrendVisible] = useState({ budget: true, expense: true, income: true });
   const toggleTrend = (key) =>
     setTrendVisible((v) => {
       const next = { ...v, [key]: !v[key] };
@@ -155,6 +159,7 @@ export default function Dashboard({ onEdit }) {
     const series = seriesBetween(accounts, transactions, r.chartFrom ?? r.from, r.to);
     const balance = totalBalance(accounts, transactions);
     const endBalance = series[series.length - 1]?.balance ?? balance;
+    const monthlyBudget = budgets.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
     return {
       cur,
       prev,
@@ -162,13 +167,18 @@ export default function Dashboard({ onEdit }) {
       balance,
       delta: cur.net,
       totals: { balance: endBalance, income: cur.income, expense: cur.expense },
-      trend: series.map((d) => ({ ...d, saving: Math.round((d.income - d.expense) * 100) / 100 })),
+      daily: series.map((d) => ({
+        date: d.date,
+        expense: d.dayExpense,
+        income: d.dayIncome,
+        budget: monthlyBudget ? Math.round((monthlyBudget / daysInMonth(d.date)) * 100) / 100 : 0,
+      })),
       rangeCats: byCategoryRange(transactions, categories, r.from, r.to),
       cats: byCategory(transactions, categories, m),
       accs: accountBalances(accounts, transactions),
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
     };
-  }, [transactions, categories, accounts, m, r]);
+  }, [transactions, categories, accounts, budgets, m, r]);
   // Un seul jour : les courbes couvrent les 7 derniers jours
   const chartLabel = r.chartFrom ? '7 derniers jours' : period.label;
   const trend = (k) => (s.prev ? change(s.cur[k], s.prev[k]) : NaN);
@@ -218,71 +228,6 @@ export default function Dashboard({ onEdit }) {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <Card
-          title="Évolution du solde"
-          subtitle={
-            <span>
-              {/* Variation du solde = cash flow : masquée avec les montants privés */}
-              {hidePrivate ? (
-                <span>••••••</span>
-              ) : (
-                <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span>
-              )}{' '}
-              · {chartLabel}
-            </span>
-          }
-        >
-          <div className="-mt-1 mb-4">
-            <SeriesToggle visible={visible} onToggle={toggleSeries} totals={s.totals} masked={hidePrivate ? PRIVATE_SERIES : []} />
-          </div>
-          <BalanceChart data={s.series} visible={visible} masked={hidePrivate ? PRIVATE_SERIES : []} height={300} />
-        </Card>
-
-        <Card title="Top catégories" subtitle={`Dépenses · ${period.label}`}>
-          <CategoryDonut data={s.rangeCats} showLegend={false} height={200} limit={5} />
-          <ul className="mt-5 flex flex-col gap-1">
-            {s.rangeCats.slice(0, 5).map((c) => (
-              <li key={c.id} className="rounded-lg px-2 py-1.5 text-sm transition-colors duration-300 hover:bg-sand/40 dark:hover:bg-white/[0.03]">
-                <div className="flex items-center gap-3">
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
-                  <span className="min-w-0 flex-1 truncate text-ink-600 dark:text-ink-300">{c.name}</span>
-                  <span className="serif text-[15px]"><Amount value={c.value} /></span>
-                  <span className="num w-11 shrink-0 text-right text-xs font-medium text-ink-500 dark:text-ink-400">
-                    {(c.share * 100).toFixed(c.share < 0.1 ? 1 : 0)} %
-                  </span>
-                </div>
-                <div className="ml-5 mt-1.5 h-1 overflow-hidden rounded-full bg-sand/60 dark:bg-white/[0.05]">
-                  <div
-                    className="h-full rounded-full transition-[width] duration-700 ease-out"
-                    style={{ width: `${c.share * 100}%`, background: c.color, opacity: 0.85 }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
-
-      <Card
-        title="Tendance cumulée"
-        subtitle={
-          <span>
-            Revenus, dépenses et épargne jour par jour · {chartLabel}
-          </span>
-        }
-      >
-        <div className="-mt-1 mb-4">
-          <SeriesToggle
-            series={TREND_SERIES}
-            visible={trendVisible}
-            onToggle={toggleTrend}
-            totals={{ income: s.cur.income, expense: s.cur.expense, saving: s.cur.net }}
-            masked={hidePrivate ? TREND_PRIVATE : []}
-          />
-        </div>
-        <TrendChart data={s.trend} visible={trendVisible} masked={hidePrivate ? TREND_PRIVATE : []} height={280} />
-      </Card>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
         {/* Dépenses de la période mises en avant */}
@@ -388,6 +333,74 @@ export default function Dashboard({ onEdit }) {
           </div>
         </Card>
       </div>
+
+      {/* Graphiques détaillés : en bas du tableau de bord */}
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <Card
+          title="Évolution du solde"
+          subtitle={
+            <span>
+              {/* Variation du solde = cash flow : masquée avec les montants privés */}
+              {hidePrivate ? (
+                <span>••••••</span>
+              ) : (
+                <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span>
+              )}{' '}
+              · {chartLabel}
+            </span>
+          }
+        >
+          <div className="-mt-1 mb-4">
+            <SeriesToggle visible={visible} onToggle={toggleSeries} totals={s.totals} masked={hidePrivate ? PRIVATE_SERIES : []} />
+          </div>
+          <BalanceChart data={s.series} visible={visible} masked={hidePrivate ? PRIVATE_SERIES : []} height={300} />
+        </Card>
+
+        <Card title="Top catégories" subtitle={`Dépenses · ${period.label}`}>
+          <CategoryDonut data={s.rangeCats} showLegend={false} height={200} limit={5} />
+          <ul className="mt-5 flex flex-col gap-1">
+            {s.rangeCats.slice(0, 5).map((c) => (
+              <li key={c.id} className="rounded-lg px-2 py-1.5 text-sm transition-colors duration-300 hover:bg-sand/40 dark:hover:bg-white/[0.03]">
+                <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
+                  <span className="min-w-0 flex-1 truncate text-ink-600 dark:text-ink-300">{c.name}</span>
+                  <span className="serif text-[15px]"><Amount value={c.value} /></span>
+                  <span className="num w-11 shrink-0 text-right text-xs font-medium text-ink-500 dark:text-ink-400">
+                    {(c.share * 100).toFixed(c.share < 0.1 ? 1 : 0)} %
+                  </span>
+                </div>
+                <div className="ml-5 mt-1.5 h-1 overflow-hidden rounded-full bg-sand/60 dark:bg-white/[0.05]">
+                  <div
+                    className="h-full rounded-full transition-[width] duration-700 ease-out"
+                    style={{ width: `${c.share * 100}%`, background: c.color, opacity: 0.85 }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
+
+      <Card
+        title="Tendance quotidienne"
+        subtitle={<span>Dépenses, revenus et budget de chaque jour · {chartLabel}</span>}
+      >
+        <div className="-mt-1 mb-4">
+          <SeriesToggle
+            series={TREND_SERIES}
+            visible={trendVisible}
+            onToggle={toggleTrend}
+            totals={{ budget: s.daily.reduce((sum, d) => sum + d.budget, 0), expense: s.cur.expense, income: s.cur.income }}
+            masked={hidePrivate ? TREND_PRIVATE : []}
+          />
+        </div>
+        <DailyChart data={s.daily} visible={trendVisible} masked={hidePrivate ? TREND_PRIVATE : []} height={280} />
+        {!budgets.length && (
+          <p className="mt-3 text-xs text-ink-500 dark:text-ink-400">
+            Aucun budget défini : créez-en dans Budgets pour afficher la ligne du budget quotidien.
+          </p>
+        )}
+      </Card>
     </div>
   );
 }
