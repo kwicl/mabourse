@@ -22,7 +22,6 @@ const PERIOD_KEY = 'mabourse-period';
 const CUSTOM_KEY = 'mabourse-period-custom';
 const HIDE_KEY = 'mabourse-hide-private';
 const PRIVATE_SERIES = ['balance', 'income'];
-const TREND_PRIVATE = ['income'];
 const readPeriod = () => {
   try {
     const k = localStorage.getItem(PERIOD_KEY);
@@ -53,19 +52,10 @@ const SERIES = [
   { key: 'expense', label: 'Dépenses' },
 ];
 
-const TREND_SERIES = [
-  { key: 'budget', label: 'Budget / jour' },
-  { key: 'expense', label: 'Dépenses' },
-  { key: 'income', label: 'Revenus' },
-];
-
-// Budget quotidien : total des budgets mensuels réparti sur les jours du mois concerné
-const daysInMonth = (iso) => new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 0).getDate();
-
 /** Boutons d'affichage des séries (au moins une reste active). */
 function SeriesToggle({ visible, onToggle, totals, masked = [], series = SERIES }) {
   const base = seriesColors(useChartTheme());
-  const colors = { ...base, budget: base.balance };
+  const colors = base;
   return (
     <div className="flex flex-wrap gap-2">
       {series.map(({ key, label }) => {
@@ -142,13 +132,6 @@ export default function Dashboard({ onEdit }) {
       return Object.values(next).some(Boolean) ? next : v;
     });
 
-  const [trendVisible, setTrendVisible] = useState({ budget: true, expense: true, income: true });
-  const toggleTrend = (key) =>
-    setTrendVisible((v) => {
-      const next = { ...v, [key]: !v[key] };
-      return Object.values(next).some(Boolean) ? next : v;
-    });
-
   const m = monthKey(todayISO());
   const r = useMemo(() => periodRange(periodKey, transactions, custom), [periodKey, transactions, custom]);
   const base = PERIODS.find((p) => p.key === periodKey);
@@ -159,7 +142,6 @@ export default function Dashboard({ onEdit }) {
     const series = seriesBetween(accounts, transactions, r.chartFrom ?? r.from, r.to);
     const balance = totalBalance(accounts, transactions);
     const endBalance = series[series.length - 1]?.balance ?? balance;
-    const monthlyBudget = budgets.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
     return {
       cur,
       prev,
@@ -167,18 +149,13 @@ export default function Dashboard({ onEdit }) {
       balance,
       delta: cur.net,
       totals: { balance: endBalance, income: cur.income, expense: cur.expense },
-      daily: series.map((d) => ({
-        date: d.date,
-        expense: d.dayExpense,
-        income: d.dayIncome,
-        budget: monthlyBudget ? Math.round((monthlyBudget / daysInMonth(d.date)) * 100) / 100 : 0,
-      })),
+      daily: series.map((d) => ({ date: d.date, expense: d.dayExpense })),
       rangeCats: byCategoryRange(transactions, categories, r.from, r.to),
       cats: byCategory(transactions, categories, m),
       accs: accountBalances(accounts, transactions),
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
     };
-  }, [transactions, categories, accounts, budgets, m, r]);
+  }, [transactions, categories, accounts, m, r]);
   // Un seul jour : les courbes couvrent les 7 derniers jours
   const chartLabel = r.chartFrom ? '7 derniers jours' : period.label;
   const trend = (k) => (s.prev ? change(s.cur[k], s.prev[k]) : NaN);
@@ -382,24 +359,15 @@ export default function Dashboard({ onEdit }) {
       </div>
 
       <Card
-        title="Tendance quotidienne"
-        subtitle={<span>Dépenses, revenus et budget de chaque jour · {chartLabel}</span>}
+        title="Dépenses quotidiennes"
+        subtitle={<span>Dépenses de chaque jour · {chartLabel}</span>}
+        action={
+          <span className="serif text-[18px]">
+            <Amount value={s.cur.expense} />
+          </span>
+        }
       >
-        <div className="-mt-1 mb-4">
-          <SeriesToggle
-            series={TREND_SERIES}
-            visible={trendVisible}
-            onToggle={toggleTrend}
-            totals={{ budget: s.daily.reduce((sum, d) => sum + d.budget, 0), expense: s.cur.expense, income: s.cur.income }}
-            masked={hidePrivate ? TREND_PRIVATE : []}
-          />
-        </div>
-        <DailyChart data={s.daily} visible={trendVisible} masked={hidePrivate ? TREND_PRIVATE : []} height={280} />
-        {!budgets.length && (
-          <p className="mt-3 text-xs text-ink-500 dark:text-ink-400">
-            Aucun budget défini : créez-en dans Budgets pour afficher la ligne du budget quotidien.
-          </p>
-        )}
+        <DailyChart data={s.daily} height={280} />
       </Card>
     </div>
   );
