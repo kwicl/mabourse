@@ -15,6 +15,7 @@ import { accountBalances, byCategory, byCategoryRange, seriesBetween, totalBalan
 import { monthKey, pct, signedMoney, todayISO } from '../utils/format';
 import { PERIODS, periodRange, rangeLabel } from '../utils/periods';
 import Amount from '../components/ui/Amount';
+import { paletteByRank } from '../utils/categoryPalette';
 
 const change = (cur, prev) => (prev ? (cur - prev) / Math.abs(prev) : NaN);
 
@@ -150,7 +151,8 @@ export default function Dashboard({ onEdit }) {
       delta: cur.net,
       totals: { balance: endBalance, income: cur.income, expense: cur.expense },
       daily: series.map((d) => ({ date: d.date, expense: d.dayExpense })),
-      rangeCats: byCategoryRange(transactions, categories, r.from, r.to),
+      // Couleurs « crépuscule antique » attribuées par rang de dépense
+      rangeCats: paletteByRank(byCategoryRange(transactions, categories, r.from, r.to)),
       cats: byCategory(transactions, categories, m),
       accs: accountBalances(accounts, transactions),
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
