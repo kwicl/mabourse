@@ -61,7 +61,7 @@ export default function App() {
             <button onClick={toggle} className="btn-ghost h-10 w-10 !p-0 lg:hidden" aria-label="Changer de thème">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button onClick={openAdd} className="btn ai-glow hidden sm:inline-flex lg:hidden">
+            <button onClick={openAdd} className="btn water-glow hidden sm:inline-flex lg:hidden">
               <Plus size={16} /> Ajouter
             </button>
           </div>

@@ -5,6 +5,7 @@ import { getConfig, saveConfig } from '../config';
 import { ping, resetLocalData, seedRemote } from '../services/sheetService';
 import { useFinance } from '../context/FinanceContext';
 import SourceSyncButton from '../components/SourceSyncButton';
+import HologramToggle from '../hologram/HologramToggle';
 
 export default function Settings() {
   const { refresh, remote, proxy, lock } = useFinance();
@@ -30,6 +31,7 @@ export default function Settings() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
+      <HologramToggle />
       {proxy && (
         <Card title="Accès sécurisé" subtitle="Connecté à Google Sheets via le serveur Vercel ; le jeton ne quitte jamais le serveur.">
           <button onClick={lock} className="btn-primary">

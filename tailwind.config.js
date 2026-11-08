@@ -5,8 +5,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Newsreader', 'Tiempos Text', 'Georgia', 'ui-serif', 'serif'],
+        // Century Gothic (Windows / macOS) ; Questrial (Google Fonts, même dessin géométrique) sur iOS / Android
+        sans: ['"Century Gothic"', 'CenturyGothic', 'AppleGothic', 'Questrial', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['"Century Gothic"', 'CenturyGothic', 'AppleGothic', 'Questrial', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Neutres chauds (inspiration Claude / Anthropic)

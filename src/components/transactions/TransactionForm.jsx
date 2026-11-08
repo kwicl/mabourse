@@ -87,6 +87,20 @@ export default function TransactionForm({ open, onClose, initial }) {
   return (
     <Modal open={open} onClose={onClose} title={initial ? "Modifier l'opération" : 'Nouvelle opération'}>
       <form onSubmit={submit} className="flex flex-col gap-5">
+        {/* Validation en haut de la fenêtre de saisie */}
+        <div className="flex gap-2">
+          {initial && (
+            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-expense" aria-label="Supprimer">
+              <Trash2 size={16} />
+            </button>
+          )}
+          <button type="submit" disabled={saving} className="btn water-glow flex-1 !py-3">
+            <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
+          </button>
+        </div>
+
+        {err && <p className="text-sm text-expense">{err}</p>}
+
         <div className="flex justify-center">
           <Segmented options={TYPES} value={form.type} onChange={(v) => setForm((f) => ({ ...f, type: v, categoryId: '' }))} />
         </div>
@@ -114,12 +128,12 @@ export default function TransactionForm({ open, onClose, initial }) {
                     type="button"
                     key={c.id}
                     onClick={() => setForm((f) => ({ ...f, categoryId: c.id }))}
-                    className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl p-2 text-[12px] font-medium leading-tight transition ${
+                    className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] transition ${
                       active ? 'bg-white shadow-soft ring-1 ring-accent/50 dark:bg-white/[0.06]' : 'hover:bg-sand/40 dark:hover:bg-white/[0.03]'
                     }`}
                   >
                     <CategoryIcon icon={c.icon} color={c.color} size={38} />
-                    <span className="w-full break-words text-center [overflow-wrap:anywhere]">{c.name}</span>
+                    <span className="w-full hyphens-auto break-words text-center">{c.name}</span>
                   </button>
                 );
               })}
@@ -157,18 +171,6 @@ export default function TransactionForm({ open, onClose, initial }) {
           <input value={form.note} onChange={set('note')} placeholder="Facultatif" className="input" />
         </label>
 
-        {err && <p className="text-sm text-expense">{err}</p>}
-
-        <div className="flex gap-2">
-          {initial && (
-            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-expense" aria-label="Supprimer">
-              <Trash2 size={16} />
-            </button>
-          )}
-          <button type="submit" disabled={saving} className="btn ai-glow flex-1 !py-3">
-            <Check size={16} /> {initial ? 'Enregistrer' : 'Ajouter'}
-          </button>
-        </div>
       </form>
     </Modal>
   );

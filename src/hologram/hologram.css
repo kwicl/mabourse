@@ -1,0 +1,364 @@
+/*
+ * MODE HOLOGRAMME — surcouche de thème.
+ * Toutes les règles « hologramme » sont préfixées par .theme-hologram (classe posée sur <html>).
+ * Sans cette classe, ce fichier ne change rien (hors interrupteur des réglages, en bas).
+ * Polices et tailles inchangées : seules couleurs, halos, verre et profondeur changent.
+ * Couleurs : variables --holo-* dérivées de la couleur d'accent existante (voir palette.js).
+ */
+
+/* ---------- Interrupteur (réglages), visible dans les deux modes ---------- */
+.holo-switch__track {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgb(var(--mb-accent) / 0.2);
+  transition: background-color 0.25s ease-out;
+}
+.holo-switch__track[data-on='true'] {
+  background: rgb(var(--mb-accent));
+}
+.holo-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(var(--mb-ink));
+  box-shadow: 0 1px 3px rgb(var(--mb-night) / 0.35);
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+.holo-switch__track[data-on='true'] .holo-switch__thumb {
+  transform: translateX(18px);
+}
+
+/* =========================== HOLOGRAMME =========================== */
+
+.theme-hologram {
+  color-scheme: dark;
+}
+
+/* ---------- Fond profond + halos ---------- */
+.theme-hologram body {
+  background: hsl(var(--holo-bg));
+  color: hsl(var(--holo-text));
+}
+.theme-hologram body::before {
+  background:
+    radial-gradient(760px 480px at 88% -8%, hsl(var(--holo-violet) / 0.18), transparent 70%),
+    radial-gradient(640px 460px at -12% 108%, hsl(var(--holo-cyan) / 0.14), transparent 70%),
+    radial-gradient(900px 600px at 50% 50%, hsl(var(--holo-bg-2)), transparent 75%);
+}
+
+/* ---------- Lignes de balayage très discrètes (transform uniquement) ---------- */
+.theme-hologram body::after {
+  content: '';
+  position: fixed;
+  inset: -4px 0 0 0;
+  z-index: 70;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    hsl(var(--holo-cyan) / 0.035) 0px,
+    hsl(var(--holo-cyan) / 0.035) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  animation: holo-scan 6s linear infinite;
+  will-change: transform;
+}
+@keyframes holo-scan {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 4px, 0);
+  }
+}
+
+/* ---------- Texte : couleur + halo, lisibilité AA ---------- */
+.theme-hologram .text-ink-900,
+.theme-hologram .dark\:text-ink-50,
+.theme-hologram .dark\:text-ink-100,
+.theme-hologram .dark\:text-ink-200 {
+  color: hsl(var(--holo-text));
+}
+.theme-hologram .text-ink-400,
+.theme-hologram .text-ink-500,
+.theme-hologram .dark\:text-ink-300,
+.theme-hologram .dark\:text-ink-400,
+.theme-hologram .dark\:text-ink-500 {
+  color: hsl(var(--holo-muted));
+}
+.theme-hologram .text-accent {
+  color: hsl(var(--holo-cyan));
+  text-shadow: 0 0 10px hsl(var(--holo-cyan) / 0.45);
+}
+.theme-hologram .text-income {
+  color: hsl(var(--holo-income));
+}
+.theme-hologram .text-expense {
+  color: hsl(var(--holo-expense));
+}
+.theme-hologram .label {
+  color: hsl(var(--holo-muted));
+}
+/* Montants : halo très léger, jamais d'animation */
+.theme-hologram .serif,
+.theme-hologram .num {
+  text-shadow: 0 0 12px hsl(var(--holo-blue) / 0.28);
+}
+
+/* Titres : halo + glitch rare (≈ 1 fois toutes les 9 s, 150 ms) */
+.theme-hologram h1,
+.theme-hologram h2,
+.theme-hologram h3 {
+  text-shadow:
+    0 0 14px hsl(var(--holo-cyan) / 0.35),
+    0 0 2px hsl(var(--holo-blue) / 0.5);
+}
+.theme-hologram h1.serif {
+  animation: holo-glitch 9s steps(1, end) infinite;
+}
+@keyframes holo-glitch {
+  0%,
+  95.5%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+  96% {
+    transform: translate3d(1.5px, 0, 0) skewX(-4deg);
+    opacity: 0.85;
+  }
+  96.5% {
+    transform: translate3d(-1px, 0, 0);
+    opacity: 1;
+  }
+  97% {
+    transform: translate3d(0.5px, 0, 0) skewX(2deg);
+    opacity: 0.9;
+  }
+}
+
+/* ---------- Verre : cartes flottantes, bordures lumineuses, reflet irisé ---------- */
+.theme-hologram .glass {
+  position: relative;
+  background: linear-gradient(155deg, hsl(var(--holo-bg-2) / 0.72), hsl(var(--holo-bg) / 0.55));
+  border-color: hsl(var(--holo-cyan) / 0.26);
+  box-shadow:
+    0 0 0 1px hsl(var(--holo-violet) / 0.08),
+    0 0 22px -6px hsl(var(--holo-cyan) / 0.3),
+    0 24px 40px -22px hsl(var(--holo-blue) / 0.55),
+    inset 0 1px 0 hsl(var(--holo-text) / 0.08);
+}
+/* L'animation d'entrée (fill-mode both) figerait transform : on libère l'état final pour la 3D au survol */
+.theme-hologram .glass.animate-fade-up {
+  animation-fill-mode: backwards;
+}
+.theme-hologram .glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+      115deg,
+      transparent 30%,
+      hsl(var(--holo-cyan) / 0.07) 42%,
+      hsl(var(--holo-violet) / 0.09) 50%,
+      hsl(var(--holo-blue) / 0.07) 58%,
+      transparent 70%
+    )
+    0% 0% / 300% 100%;
+  animation: holo-sheen 14s ease-in-out infinite;
+}
+@keyframes holo-sheen {
+  0%,
+  100% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 0% 0;
+  }
+}
+/* Profondeur 3D au survol / toucher */
+.theme-hologram .glass:hover,
+.theme-hologram .glass:active {
+  transform: perspective(900px) translate3d(0, -2px, 10px) rotateX(1deg);
+  border-color: hsl(var(--holo-cyan) / 0.42);
+}
+
+/* ---------- Bordures et surfaces génériques ---------- */
+.theme-hologram .border-sand-line,
+.theme-hologram .dark\:border-night-line {
+  border-color: hsl(var(--holo-cyan) / 0.2);
+}
+.theme-hologram .dark\:bg-white\/\[0\.03\],
+.theme-hologram .dark\:bg-white\/\[0\.04\] {
+  background-color: hsl(var(--holo-cyan) / 0.05);
+}
+.theme-hologram .dark\:bg-white\/\[0\.06\],
+.theme-hologram .dark\:bg-white\/\[0\.1\] {
+  background-color: hsl(var(--holo-cyan) / 0.13);
+  box-shadow: 0 0 14px -4px hsl(var(--holo-cyan) / 0.45);
+}
+.theme-hologram .dark\:ring-night-line {
+  --tw-ring-color: hsl(var(--holo-cyan) / 0.3);
+}
+
+/* ---------- Boutons ---------- */
+.theme-hologram .btn-primary {
+  background: linear-gradient(135deg, hsl(var(--holo-blue) / 0.22), hsl(var(--holo-violet) / 0.22));
+  color: hsl(var(--holo-text));
+  box-shadow:
+    inset 0 0 0 1px hsl(var(--holo-cyan) / 0.45),
+    0 0 18px -4px hsl(var(--holo-cyan) / 0.5),
+    0 10px 22px -12px hsl(var(--holo-blue) / 0.6);
+}
+.theme-hologram .btn-primary:hover:not(:disabled) {
+  transform: perspective(600px) translate3d(0, -1px, 6px);
+  box-shadow:
+    inset 0 0 0 1px hsl(var(--holo-cyan) / 0.7),
+    0 0 26px -2px hsl(var(--holo-cyan) / 0.6),
+    0 14px 26px -12px hsl(var(--holo-blue) / 0.7);
+}
+.theme-hologram .btn-ghost {
+  color: hsl(var(--holo-muted));
+}
+.theme-hologram .btn-ghost:hover {
+  background: hsl(var(--holo-cyan) / 0.08);
+  color: hsl(var(--holo-text));
+}
+.theme-hologram .ai-glow {
+  background: hsl(var(--holo-bg-2));
+}
+.theme-hologram .badge {
+  background: hsl(var(--holo-cyan) / 0.08);
+  border-color: hsl(var(--holo-cyan) / 0.3);
+  color: hsl(var(--holo-text));
+}
+.theme-hologram .holo-switch__track {
+  background: hsl(var(--holo-cyan) / 0.15);
+  box-shadow: inset 0 0 0 1px hsl(var(--holo-cyan) / 0.4);
+}
+.theme-hologram .holo-switch__track[data-on='true'] {
+  background: linear-gradient(90deg, hsl(var(--holo-blue)), hsl(var(--holo-violet)));
+  box-shadow: 0 0 14px hsl(var(--holo-cyan) / 0.55);
+}
+.theme-hologram .holo-switch__thumb {
+  background: hsl(var(--holo-text));
+}
+
+/* ---------- Formulaires ---------- */
+.theme-hologram .input {
+  background: hsl(var(--holo-bg) / 0.6);
+  border-color: hsl(var(--holo-cyan) / 0.25);
+  color: hsl(var(--holo-text));
+}
+.theme-hologram .input:focus {
+  border-color: hsl(var(--holo-cyan) / 0.7);
+  box-shadow: 0 0 0 4px hsl(var(--holo-cyan) / 0.12), 0 0 18px -4px hsl(var(--holo-cyan) / 0.5);
+}
+.theme-hologram .input::placeholder {
+  color: hsl(var(--holo-muted) / 0.8);
+}
+
+/* ---------- Modales ---------- */
+.theme-hologram [role='dialog'] {
+  background: linear-gradient(160deg, hsl(var(--holo-bg-2) / 0.94), hsl(var(--holo-bg) / 0.94));
+  border-color: hsl(var(--holo-cyan) / 0.32);
+  box-shadow:
+    0 0 0 1px hsl(var(--holo-violet) / 0.12),
+    0 0 40px -8px hsl(var(--holo-cyan) / 0.35),
+    0 30px 60px -20px hsl(var(--holo-blue) / 0.5);
+}
+
+/* ---------- Barres de navigation ---------- */
+.theme-hologram aside {
+  background: hsl(var(--holo-bg) / 0.55);
+  border-color: hsl(var(--holo-cyan) / 0.16);
+}
+.theme-hologram .nav-bubble-host {
+  background: hsl(var(--holo-bg-2) / 0.78);
+  border-color: hsl(var(--holo-cyan) / 0.32);
+  box-shadow:
+    0 0 24px -6px hsl(var(--holo-cyan) / 0.4),
+    0 18px 30px -14px hsl(var(--holo-blue) / 0.6);
+}
+/* Bulle en couleurs holographiques */
+.theme-hologram .nav-bubble__body {
+  background: linear-gradient(140deg, hsl(var(--holo-cyan) / 0.18), hsl(var(--holo-violet) / 0.16));
+  border-color: hsl(var(--holo-cyan) / 0.45);
+  box-shadow:
+    inset 0 2px 3px hsl(var(--holo-text) / 0.45),
+    inset 0 -4px 7px hsl(var(--holo-violet) / 0.35),
+    0 0 14px -2px hsl(var(--holo-cyan) / 0.45);
+}
+.theme-hologram .nav-bubble__shine {
+  background: radial-gradient(ellipse at center, hsl(var(--holo-text) / 0.75), hsl(var(--holo-text) / 0) 70%);
+}
+
+/* ---------- Graphiques (Recharts) ---------- */
+.theme-hologram .recharts-cartesian-grid line {
+  stroke: hsl(var(--holo-cyan) / 0.09);
+}
+.theme-hologram .recharts-cartesian-axis-tick text {
+  fill: hsl(var(--holo-muted));
+}
+.theme-hologram .recharts-line-curve,
+.theme-hologram .recharts-area-curve {
+  filter: drop-shadow(0 0 4px hsl(var(--holo-cyan) / 0.45));
+}
+.theme-hologram .recharts-tooltip-wrapper > div {
+  background: hsl(var(--holo-bg-2) / 0.95);
+  border-color: hsl(var(--holo-cyan) / 0.35);
+  box-shadow: 0 0 20px -4px hsl(var(--holo-cyan) / 0.4);
+}
+
+/* ---------- Divers ---------- */
+.theme-hologram ::selection {
+  background: hsl(var(--holo-cyan) / 0.3);
+}
+.theme-hologram ::-webkit-scrollbar-thumb {
+  background: hsl(var(--holo-cyan) / 0.25);
+  background-clip: padding-box;
+}
+
+/* ---------- Version allégée (appareil lent) ---------- */
+.theme-hologram.holo-lite body::after,
+.theme-hologram.holo-lite .glass::after {
+  animation: none;
+}
+.theme-hologram.holo-lite .glass,
+.theme-hologram.holo-lite [role='dialog'],
+.theme-hologram.holo-lite .nav-bubble-host,
+.theme-hologram.holo-lite aside {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.theme-hologram.holo-lite .recharts-line-curve,
+.theme-hologram.holo-lite .recharts-area-curve {
+  filter: none;
+}
+.theme-hologram.holo-lite h1.serif {
+  animation: none;
+}
+
+/* ---------- Mouvement réduit : ni scintillement, ni déformation, ni respiration ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .theme-hologram body::after,
+  .theme-hologram .glass::after,
+  .theme-hologram h1.serif {
+    animation: none;
+  }
+  .theme-hologram .glass:hover,
+  .theme-hologram .glass:active,
+  .theme-hologram .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
+}
