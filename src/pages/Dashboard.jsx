@@ -287,6 +287,18 @@ export default function Dashboard({ onEdit }) {
         />
       </div>
 
+      <Card
+        title="Dépenses quotidiennes"
+        subtitle={<span>Dépenses de chaque jour · {chartLabel}</span>}
+        action={
+          <span className="serif text-[18px]">
+            <Amount value={s.cur.expense} />
+          </span>
+        }
+      >
+        <DailyChart data={s.daily} height={280} />
+      </Card>
+
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Card
           title="Opérations récentes"
@@ -358,17 +370,6 @@ export default function Dashboard({ onEdit }) {
         </Card>
       </div>
 
-      <Card
-        title="Dépenses quotidiennes"
-        subtitle={<span>Dépenses de chaque jour · {chartLabel}</span>}
-        action={
-          <span className="serif text-[18px]">
-            <Amount value={s.cur.expense} />
-          </span>
-        }
-      >
-        <DailyChart data={s.daily} height={280} />
-      </Card>
     </div>
   );
 }
