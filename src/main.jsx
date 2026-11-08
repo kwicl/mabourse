@@ -7,6 +7,7 @@ import './index.css';
 import './hologram/useHologram';
 import './hologram/hologram.css';
 import './hologram/water-button.js';
+import './hologram/app-background.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
