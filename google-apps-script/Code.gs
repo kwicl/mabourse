@@ -142,8 +142,15 @@ function importFeuille1() {
     }
   });
 
-  // Catégories et comptes : remplacés par ceux issus de l'historique
+  // Catégories : celles issues de l'historique + celles créées dans l'app (conservées)
   var catRows = Object.keys(categories).map(function (k) { return categories[k]; });
+  var catSheet = ss.getSheetByName('Categories');
+  if (catSheet.getLastRow() > 1) {
+    catSheet.getRange(2, 1, catSheet.getLastRow() - 1, SCHEMA.Categories.length).getValues()
+      .filter(function (row) { return row[0] !== '' && !categories[row[2] + ':' + row[0]]; })
+      .forEach(function (row) { catRows.push(row); });
+  }
+  // Comptes : remplacés par ceux issus de l'historique
   rewrite_(ss.getSheetByName('Categories'), SCHEMA.Categories.length, catRows);
   rewrite_(ss.getSheetByName('Accounts'), SCHEMA.Accounts.length, [
     [IMPORT_CASH, 'Espèces', 'cash', 0, '#10b981'],

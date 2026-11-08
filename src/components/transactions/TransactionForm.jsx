@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Trash2 } from 'lucide-react';
+import { Check, Plus, Trash2, X } from 'lucide-react';
 import Modal from '../ui/Modal';
 import Segmented from '../ui/Segmented';
 import CategoryIcon from '../ui/CategoryIcon';
 import { useFinance } from '../../context/FinanceContext';
 import { todayISO } from '../../utils/format';
 import { getConfig } from '../../config';
+import { buildCategory } from '../../utils/categoryStyle';
 
 const TYPES = [
   { value: 'expense', label: 'Dépense' },
@@ -25,19 +26,38 @@ const blank = (accounts) => ({
 
 /** Formulaire d'ajout / édition rapide (modal). `initial` = transaction existante ou null. */
 export default function TransactionForm({ open, onClose, initial }) {
-  const { categories, accounts, tx } = useFinance();
+  const { categories, accounts, tx, categoriesApi } = useFinance();
   const [form, setForm] = useState(() => blank(accounts));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+  const [newCat, setNewCat] = useState(null); // null = fermé, sinon nom en cours de saisie
 
   useEffect(() => {
     if (open) {
       setForm(initial ? { ...blank(accounts), ...initial, amount: String(initial.amount) } : blank(accounts));
       setErr('');
+      setNewCat(null);
     }
   }, [open, initial, accounts]);
 
   const cats = useMemo(() => categories.filter((c) => c.type === form.type), [categories, form.type]);
+
+  // Nouvelle catégorie saisie à la main : enregistrée dans la feuille Categories, puis sélectionnée
+  async function addCategory() {
+    const name = (newCat ?? '').trim();
+    if (!name) return;
+    const cat = buildCategory(name, form.type, categories);
+    if (!cat.id) return setErr('Nom de catégorie invalide.');
+    const existing = cats.find((c) => c.id === cat.id || c.name.toLowerCase() === cat.name.toLowerCase());
+    try {
+      if (!existing) await categoriesApi.add(cat);
+      setForm((f) => ({ ...f, categoryId: existing ? existing.id : cat.id }));
+      setNewCat(null);
+      setErr('');
+    } catch (e) {
+      setErr(e.message);
+    }
+  }
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v?.target ? v.target.value : v }));
 
   async function submit(e) {
@@ -137,7 +157,47 @@ export default function TransactionForm({ open, onClose, initial }) {
                   </button>
                 );
               })}
+              {newCat === null && (
+                <button
+                  type="button"
+                  onClick={() => setNewCat('')}
+                  className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] text-ink-500 transition hover:bg-sand/40 dark:text-ink-400 dark:hover:bg-white/[0.03]"
+                >
+                  <span className="inline-flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-dashed border-ink-300 dark:border-ink-600">
+                    <Plus size={16} />
+                  </span>
+                  <span className="w-full text-center">Nouvelle</span>
+                </button>
+              )}
             </div>
+            {newCat !== null && (
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  autoFocus
+                  value={newCat}
+                  onChange={(e) => setNewCat(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addCategory();
+                    } else if (e.key === 'Escape') {
+                      e.stopPropagation();
+                      setNewCat(null);
+                    }
+                  }}
+                  placeholder={form.type === 'income' ? 'Nouvelle catégorie de revenu' : 'Nouvelle catégorie de dépense'}
+                  aria-label="Nom de la nouvelle catégorie"
+                  maxLength={40}
+                  className="input min-w-0 flex-1"
+                />
+                <button type="button" onClick={addCategory} disabled={!newCat.trim()} className="btn-primary h-11 shrink-0">
+                  <Check size={16} /> Créer
+                </button>
+                <button type="button" onClick={() => setNewCat(null)} className="btn-ghost h-11 w-11 shrink-0 !p-0" aria-label="Annuler">
+                  <X size={16} />
+                </button>
+              </div>
+            )}
           </div>
         ) : null}
 
