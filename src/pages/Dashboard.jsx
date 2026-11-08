@@ -301,29 +301,12 @@ export default function Dashboard({ onEdit }) {
         <DailyChart data={s.daily} height={280} />
       </Card>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <Card
-          title="Opérations récentes"
-          action={<button onClick={() => navigate('transactions')} className="btn-ghost !py-1.5 text-xs">Tout voir</button>}
-        >
-          <TransactionList transactions={s.recent} onSelect={onEdit} />
-        </Card>
-        <Card
-          title="Budgets"
-          subtitle="Ce mois-ci"
-          action={<button onClick={() => navigate('budgets')} className="btn-ghost !py-1.5 text-xs">Gérer</button>}
-        >
-          <div className="flex flex-col gap-2">
-            {topBudgets.length ? (
-              topBudgets.map((b) => (
-                <BudgetBar key={b.id} compact category={categoryById(b.categoryId, 'expense')} spent={b.spent} amount={Number(b.amount)} onClick={() => navigate('budgets')} />
-              ))
-            ) : (
-              <p className="py-8 text-center text-sm text-ink-400">Aucun budget défini.</p>
-            )}
-          </div>
-        </Card>
-      </div>
+      <Card
+        title="Opérations récentes"
+        action={<button onClick={() => navigate('transactions')} className="btn-ghost !py-1.5 text-xs">Tout voir</button>}
+      >
+        <TransactionList transactions={s.recent} onSelect={onEdit} />
+      </Card>
 
       {/* Graphiques détaillés : en bas du tableau de bord */}
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -372,6 +355,23 @@ export default function Dashboard({ onEdit }) {
         </Card>
       </div>
 
+
+      {/* Budgets : tout en bas */}
+      <Card
+        title="Budgets"
+        subtitle="Ce mois-ci"
+        action={<button onClick={() => navigate('budgets')} className="btn-ghost !py-1.5 text-xs">Gérer</button>}
+      >
+        <div className="flex flex-col gap-2">
+          {topBudgets.length ? (
+            topBudgets.map((b) => (
+              <BudgetBar key={b.id} compact category={categoryById(b.categoryId, 'expense')} spent={b.spent} amount={Number(b.amount)} onClick={() => navigate('budgets')} />
+            ))
+          ) : (
+            <p className="py-8 text-center text-sm text-ink-400">Aucun budget défini.</p>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
