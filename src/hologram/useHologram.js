@@ -4,16 +4,31 @@
  * Sans cette classe, aucun style de hologram.css ne s'applique.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { BASE_VARS, HOLO_VARS, applyVars } from './palette';
+import { BASE_VARS, applyVars, themeById } from './palette';
 
 const KEY = 'mabourse-hologram';
+const THEME = 'mabourse-hologram-theme'; // id du thème de la surcouche (voir THEMES dans palette.js)
 const THEME_KEY = 'mabourse-theme'; // clé existante de useTheme (lecture seule)
 const CLASS = 'theme-hologram';
 const EVENT = 'mabourse-hologram';
 const root = document.documentElement;
 
 applyVars(root, BASE_VARS);
-applyVars(root, HOLO_VARS);
+
+const readTheme = () => {
+  try {
+    return themeById(localStorage.getItem(THEME)).id;
+  } catch {
+    return themeById().id;
+  }
+};
+
+function applyTheme(id) {
+  const t = themeById(id);
+  applyVars(root, t.vars);
+  root.dataset.holoTheme = t.id;
+}
+applyTheme(readTheme());
 
 const read = () => {
   try {
@@ -85,16 +100,31 @@ export function setHologram(on) {
   window.dispatchEvent(new CustomEvent(EVENT, { detail: on }));
 }
 
+/** Choisit l'apparence : 'origin' (design d'origine) ou l'id d'un thème de la surcouche. */
+export function setAppearance(id) {
+  if (id === 'origin') return setHologram(false);
+  try {
+    localStorage.setItem(THEME, themeById(id).id);
+  } catch {
+    /* ignore */
+  }
+  applyTheme(id);
+  setHologram(true);
+}
+
+const currentAppearance = () =>
+  root.classList.contains(CLASS) ? root.dataset.holoTheme || themeById().id : 'origin';
+
 // Appliqué dès l'import (avant le premier rendu) pour éviter un flash.
 if (read()) apply(true);
 
 export function useHologram() {
-  const [on, setOn] = useState(() => root.classList.contains(CLASS));
+  const [appearance, setApp] = useState(currentAppearance);
   useEffect(() => {
-    const sync = () => setOn(root.classList.contains(CLASS));
+    const sync = () => setApp(currentAppearance());
     window.addEventListener(EVENT, sync);
     return () => window.removeEventListener(EVENT, sync);
   }, []);
   const toggle = useCallback(() => setHologram(!root.classList.contains(CLASS)), []);
-  return { on, toggle };
+  return { on: appearance !== 'origin', toggle, appearance, setAppearance };
 }
