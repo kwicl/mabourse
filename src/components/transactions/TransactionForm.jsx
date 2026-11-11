@@ -7,6 +7,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { todayISO } from '../../utils/format';
 import { getConfig } from '../../config';
 import { buildCategory } from '../../utils/categoryStyle';
+import { armCash, ringRegister } from '../../utils/cashRegister';
 
 const TYPES = [
   { value: 'expense', label: 'Dépense' },
@@ -78,9 +79,12 @@ export default function TransactionForm({ open, onClose, initial }) {
       note: form.note.trim() || (form.type === 'transfer' ? '' : cats.find((c) => c.id === form.categoryId)?.name ?? ''),
     };
     setSaving(true);
+    // Caisse ancienne : audio débloqué pendant le geste, montants armés pour défiler
+    armCash();
     try {
       if (initial) await tx.update(initial.id, row);
       else await tx.add(row);
+      ringRegister();
       onClose();
     } catch (e2) {
       setErr(e2.message);

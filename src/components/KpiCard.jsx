@@ -33,7 +33,7 @@ export default function KpiCard({
         </span>
       </div>
       <div className="serif mt-4 truncate text-[18px] leading-none sm:text-[30px] xl:text-[23px] 2xl:text-[30px]">
-        <Amount value={value} hidden={hidden} />
+        <Amount value={value} hidden={hidden} animate />
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
         {hasTrend ? (

@@ -222,7 +222,7 @@ export default function Dashboard({ onEdit }) {
             </span>
           </div>
           <div className="serif relative mt-5 whitespace-nowrap text-[36px] leading-[0.95] sm:text-[52px] xl:text-[42px] 2xl:text-[54px]">
-            <Amount value={s.cur.expense} />
+            <Amount value={s.cur.expense} animate />
           </div>
           <div className="relative mt-3 flex flex-wrap items-center gap-1.5 text-[13px]">
             {Number.isFinite(trend('expense')) ? (
@@ -294,7 +294,7 @@ export default function Dashboard({ onEdit }) {
         subtitle={<span>Dépenses de chaque jour · {chartLabel}</span>}
         action={
           <span className="serif text-[18px]">
-            <Amount value={s.cur.expense} />
+            <Amount value={s.cur.expense} animate />
           </span>
         }
       >
