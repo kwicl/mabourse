@@ -95,11 +95,11 @@
   animation: nav-bubble-breathe 3s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
+
+/* iOS (Safari / PWA) : pas de backdrop-filter sur la bulle animée, sinon l'animation peut se figer */
+@supports (-webkit-touch-callout: none) {
   .nav-bubble__body {
-    animation: none;
-  }
-  .nav-bubble {
-    transition: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

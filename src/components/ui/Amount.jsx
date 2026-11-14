@@ -23,10 +23,6 @@ export default function Amount({ value, sign = '', hidden = false, className = '
       setShown(value);
       return undefined;
     }
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      setShown(value);
-      return undefined;
-    }
     setDelta({ v: value - from, key: Date.now() });
     const start = performance.now();
     const tick = (now) => {

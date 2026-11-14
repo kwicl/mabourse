@@ -149,12 +149,7 @@
   .ai-glow:disabled::after {
     animation-play-state: paused;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ai-glow::before,
-    .ai-glow::after {
-      animation: none;
-    }
-  }
+
 }
 
 /* Contour des zones : bordure terre cuite lumineuse qui respire doucement (hors thème hologramme) */
@@ -186,15 +181,7 @@
 :root:not(.theme-hologram) .glass:hover {
   border-color: rgba(245, 145, 80, 0.95);
 }
-@media (prefers-reduced-motion: reduce) {
-  :root:not(.theme-hologram) .glass,
-  :root:not(.theme-hologram) .glass.animate-fade-up {
-    animation: none;
-    box-shadow:
-      0 0 0 1px rgba(232, 120, 60, 0.6),
-      0 0 16px -2px rgba(240, 130, 60, 0.5);
-  }
-}
+
 
 /* Caisse : chiffres qui défilent + montant ajouté qui s'envole */
 .cash-rolling {

@@ -7,11 +7,57 @@ let ctx = null;
 let lastRing = 0;
 const WINDOW_MS = 5000;
 
+let unlocked = false;
+
+/** WAV silencieux très court (généré, aucun fichier). */
+function silentWavUrl() {
+  const n = 800;
+  const buf = new ArrayBuffer(44 + n * 2);
+  const v = new DataView(buf);
+  const w = (o, str) => [...str].forEach((ch, i) => v.setUint8(o + i, ch.charCodeAt(0)));
+  w(0, 'RIFF');
+  v.setUint32(4, 36 + n * 2, true);
+  w(8, 'WAVEfmt ');
+  v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true);
+  v.setUint32(28, 16000, true);
+  v.setUint16(32, 2, true);
+  v.setUint16(34, 16, true);
+  w(36, 'data');
+  v.setUint32(40, n * 2, true);
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+
+/**
+ * iOS : le Web Audio est coupé par l'interrupteur silencieux et joue bas tant que la session
+ * audio n'est pas en « lecture ». On la passe en lecture (Safari 17+) et, pour les versions
+ * plus anciennes, on joue une fois un son HTML silencieux pendant le geste, ce qui a le même effet.
+ */
+function unlockIOS() {
+  if (unlocked) return;
+  unlocked = true;
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch {
+    /* ignore */
+  }
+  try {
+    const a = new Audio(silentWavUrl());
+    a.setAttribute('playsinline', '');
+    a.play()?.catch(() => {});
+  } catch {
+    /* ignore */
+  }
+}
+
 /** À appeler pendant le geste utilisateur (avant tout await) pour débloquer l'audio sur mobile. */
 export function primeAudio() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
+    unlockIOS();
     if (!ctx) ctx = new AC();
     if (ctx.state === 'suspended') ctx.resume();
   } catch {
@@ -109,9 +155,19 @@ export function ringRegister() {
   if (!ctx) return;
   try {
     const c = ctx;
+    // Chaîne de sortie : entrée -> compresseur (resserre les pics) -> gain de rattrapage.
+    // Le son paraît nettement plus fort sans saturer.
     const out = c.createGain();
-    out.gain.value = 0.55;
-    out.connect(c.destination);
+    out.gain.value = 1;
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -20;
+    comp.knee.value = 6;
+    comp.ratio.value = 12;
+    comp.attack.value = 0.002;
+    comp.release.value = 0.15;
+    const makeup = c.createGain();
+    makeup.gain.value = 7;
+    out.connect(comp).connect(makeup).connect(c.destination);
     const t0 = c.currentTime + 0.02;
     // Frappe des touches
     [0, 0.09, 0.17].forEach((dt, i) => clack(c, out, t0 + dt, { freq: 2300 + i * 250, gain: 0.55 }));

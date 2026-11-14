@@ -179,10 +179,13 @@
   backdrop-filter: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .water-glow::before,
-  .water-glow::after,
-  .water-glow.water-pop::before {
-    animation: none;
+
+
+/* iOS (Safari / PWA) : un calque animé avec backdrop-filter peut rester figé ; on retire le flou
+   pour garantir l'oscillation. Le verre reste visible grâce au dégradé et aux reflets. */
+@supports (-webkit-touch-callout: none) {
+  .water-glow::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

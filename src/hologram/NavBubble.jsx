@@ -17,7 +17,6 @@ const W = 58;
 const H = 46;
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 export default function NavBubble({ navRef, activeId }) {
   const outer = useRef(null);
@@ -77,7 +76,7 @@ export default function NavBubble({ navRef, activeId }) {
     const st = s.current;
     st.target = el.offsetLeft + el.offsetWidth / 2 - W / 2;
     st.baseY = el.offsetTop + el.offsetHeight / 2 - H / 2;
-    if (snap || !st.ready || reducedMotion()) {
+    if (snap || !st.ready) {
       cancelAnimationFrame(st.raf);
       st.raf = 0;
       st.x = st.from = st.target;

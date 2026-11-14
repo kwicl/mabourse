@@ -69,49 +69,50 @@ const fromHex = (p) =>
   Object.fromEntries(Object.entries(p).map(([k, v]) => [`--holo-${k}`, hsl(hexToHsl(v))]));
 
 /**
- * Thèmes de la surcouche. Chaque thème remplit les mêmes 10 emplacements :
- * cyan / blue / violet = halos et reflets (ordre : dominant, secondaire, tertiaire).
+ * Thèmes de la surcouche. Chaque thème a deux variantes (`dark` = mode nuit, `light` = mode jour)
+ * qui remplissent les mêmes 10 emplacements : cyan / blue / violet = halos et reflets
+ * (ordre : dominant, secondaire, tertiaire). Les fonds portent la teinte du thème pour que
+ * chaque thème se reconnaisse au premier coup d'œil.
  */
+const T = (id, label, desc, dark, light) => ({ id, label, desc, dark: fromHex(dark), light: fromHex(light) });
+
 export const THEMES = [
-  { id: 'hologram', label: 'Hologramme', desc: 'Cyan, bleu électrique, violet', vars: HOLO_VARS },
   {
-    id: 'aurora', label: 'Aurore boréale', desc: 'Vert polaire, turquoise, magenta',
-    vars: fromHex({ cyan: '#4BF2A0', blue: '#2FD3C8', violet: '#D96CFF', accent: '#F2B45A', text: '#E8FFF5', muted: '#9CC4B6', bg: '#03110D', 'bg-2': '#08201A', income: '#6FE3A1', expense: '#FF7D8C' }),
+    id: 'hologram', label: 'Hologramme', desc: 'Cyan, bleu électrique, violet',
+    dark: HOLO_VARS,
+    light: fromHex({ cyan: '#0095B3', blue: '#2F5BFF', violet: '#7B3FE4', accent: '#C2481F', text: '#0B1530', muted: '#4C5C7A', bg: '#EAF4FF', 'bg-2': '#D6E4FF', income: '#1F7F55', expense: '#C9304A' }),
   },
-  {
-    id: 'synthwave', label: 'Synthwave', desc: 'Rose néon, orange, violet',
-    vars: fromHex({ cyan: '#FF4FA3', blue: '#FF9E4A', violet: '#8F5BFF', accent: '#FFD166', text: '#FCEBFF', muted: '#B9A3CC', bg: '#12061F', 'bg-2': '#1F0B33', income: '#5EE6B8', expense: '#FF5C7A' }),
-  },
-  {
-    id: 'abyss', label: 'Abysses', desc: 'Bioluminescence marine',
-    vars: fromHex({ cyan: '#00E0FF', blue: '#2B6CFF', violet: '#7CFFCB', accent: '#FFB86B', text: '#E3F7FF', muted: '#8DAFC4', bg: '#020A14', 'bg-2': '#061A2B', income: '#7CFFCB', expense: '#FF7A7A' }),
-  },
-  {
-    id: 'ember', label: 'Braise', desc: 'Volcan, ambre, carmin',
-    vars: fromHex({ cyan: '#FF6A3D', blue: '#FFB347', violet: '#E8344E', accent: '#FFD38A', text: '#FFF0E6', muted: '#C9A99A', bg: '#140605', 'bg-2': '#24100C', income: '#8FD694', expense: '#FF5468' }),
-  },
-  {
-    id: 'onyx', label: 'Onyx et or', desc: 'Luxe, champagne, bronze',
-    vars: fromHex({ cyan: '#E6C27A', blue: '#F3E3BF', violet: '#B07A45', accent: '#E6C27A', text: '#F7F1E3', muted: '#ABA190', bg: '#0B0A08', 'bg-2': '#1A1712', income: '#9FCC8E', expense: '#E27A6A' }),
-  },
-  {
-    id: 'jade', label: 'Jade impérial', desc: 'Jade, or, laque rouge',
-    vars: fromHex({ cyan: '#3FCFA0', blue: '#E8C46A', violet: '#E2553F', accent: '#E8C46A', text: '#EAF7F1', muted: '#9BBDB0', bg: '#04120F', 'bg-2': '#0A221C', income: '#6FD6A0', expense: '#F06B5A' }),
-  },
-  {
-    id: 'nebula', label: 'Nébuleuse', desc: 'Lavande, rose cosmique, bleu',
-    vars: fromHex({ cyan: '#B085FF', blue: '#FF7AD9', violet: '#6FD6FF', accent: '#FFC37A', text: '#F1EDFF', muted: '#A9A3C9', bg: '#070616', 'bg-2': '#130F2E', income: '#7BE0B5', expense: '#FF7A9A' }),
-  },
-  {
-    // Revenus en vert menthe (et non phosphore) pour rester distincts des halos.
-    id: 'terminal', label: 'Terminal', desc: 'Phosphore vert, rétro',
-    vars: fromHex({ cyan: '#39FF7A', blue: '#A6FF4D', violet: '#00D18F', accent: '#FFB000', text: '#D9FFE3', muted: '#86B894', bg: '#020B04', 'bg-2': '#08170B', income: '#7FE0C8', expense: '#FF5F56' }),
-  },
-  {
-    id: 'arctic', label: 'Glace arctique', desc: 'Bleu glacier, blanc, saphir',
-    vars: fromHex({ cyan: '#9BE7FF', blue: '#E3F6FF', violet: '#6FA8FF', accent: '#FFB4A2', text: '#F2FAFF', muted: '#9DB4C4', bg: '#061018', 'bg-2': '#0D1E2C', income: '#8EE3C2', expense: '#FF8A95' }),
-  },
+  T('sakura', 'Cerisier en fleur', 'Rose poudré, prune, feuille',
+    { cyan: '#FF8FB8', blue: '#FFC2D6', violet: '#9DD67A', accent: '#FFD27A', text: '#FFEFF4', muted: '#C9A2B2', bg: '#1F0A14', 'bg-2': '#3A1428', income: '#9DD67A', expense: '#FF6B6B' },
+    { cyan: '#D63A78', blue: '#B0306A', violet: '#4F8F2F', accent: '#A8650A', text: '#3A0F22', muted: '#7D5566', bg: '#FFF0F5', 'bg-2': '#FFD6E5', income: '#3D7F2A', expense: '#C62F3B' }),
+  T('saffron', 'Safran et indigo', 'Safran, indigo, vermillon',
+    { cyan: '#FFB627', blue: '#6F7DFF', violet: '#FF5E3A', accent: '#FFE08A', text: '#FFF6E0', muted: '#C4B48F', bg: '#0D0B2A', 'bg-2': '#1E1C55', income: '#7FD99A', expense: '#FF6B5E' },
+    { cyan: '#B86E00', blue: '#3343C9', violet: '#D63A1A', accent: '#8A5A00', text: '#1A1640', muted: '#5E5A7D', bg: '#FFF7E3', 'bg-2': '#FFE3A6', income: '#2E7D4A', expense: '#C0392B' }),
+  T('lagoon', 'Lagon et corail', 'Turquoise, corail, sable',
+    { cyan: '#2EE6D6', blue: '#FF8A6B', violet: '#FFD59E', accent: '#FF9F80', text: '#E6FFFB', muted: '#8FBFB9', bg: '#01262A', 'bg-2': '#044542', income: '#8CF0B4', expense: '#FF5C7A' },
+    { cyan: '#00897B', blue: '#E4573F', violet: '#B87A1E', accent: '#C9452E', text: '#06302F', muted: '#4E7370', bg: '#E3FAF6', 'bg-2': '#FFE1D6', income: '#1B7F4F', expense: '#C2334D' }),
+  T('lava', 'Lave', 'Magma, ambre, carmin',
+    { cyan: '#FF5A1F', blue: '#FFB800', violet: '#E0234E', accent: '#FFD27A', text: '#FFF0E6', muted: '#C79F8F', bg: '#1A0503', 'bg-2': '#3D0F07', income: '#A8E07A', expense: '#FF4D6A' },
+    { cyan: '#D9480F', blue: '#A86E00', violet: '#B0122F', accent: '#A34700', text: '#2E0E05', muted: '#7A5245', bg: '#FFF1E6', 'bg-2': '#FFD5B8', income: '#3F7F1F', expense: '#C2183A' }),
+  T('onyx', 'Onyx et or', 'Noir laqué, or, champagne',
+    { cyan: '#E8C468', blue: '#F5E6C4', violet: '#B8804A', accent: '#E8C468', text: '#F7F1E3', muted: '#A89E8C', bg: '#0A0908', 'bg-2': '#1C1813', income: '#A8CC8E', expense: '#E27A6A' },
+    { cyan: '#9A7212', blue: '#6B5A3A', violet: '#8A5A2B', accent: '#8F6210', text: '#1F1A12', muted: '#6E6455', bg: '#FBF6EA', 'bg-2': '#EEDFBE', income: '#4D7A33', expense: '#B04A3A' }),
+  T('bordeaux', 'Velours bordeaux', 'Grenat, or rose, crème',
+    { cyan: '#FF6F91', blue: '#F2B5A0', violet: '#E0245E', accent: '#F2C79B', text: '#FFEDF1', muted: '#C49AA5', bg: '#1E0510', 'bg-2': '#420D26', income: '#9BD9A6', expense: '#FF8A5C' },
+    { cyan: '#A8123F', blue: '#B5654E', violet: '#7A0A2E', accent: '#A0522D', text: '#2E0716', muted: '#7A4E5A', bg: '#FFF0F2', 'bg-2': '#F3CED7', income: '#2F7A45', expense: '#C2410C' }),
+  T('matcha', 'Matcha et cuivre', 'Thé vert, cuivre, menthe',
+    { cyan: '#A8D672', blue: '#E08A4F', violet: '#5FBFA0', accent: '#F2C46D', text: '#F1F8E6', muted: '#A3B48E', bg: '#0C1406', 'bg-2': '#1E2E10', income: '#A8D672', expense: '#FF7A5C' },
+    { cyan: '#4F7F17', blue: '#B5541E', violet: '#2E8A6E', accent: '#9A6A0E', text: '#1A260C', muted: '#5D6B4C', bg: '#F3F8E8', 'bg-2': '#DDEBC0', income: '#3E7A1A', expense: '#C0441E' }),
+  T('lavender', 'Lavande de Provence', 'Lavande, miel, olivier',
+    { cyan: '#B79CFF', blue: '#FFD166', violet: '#9CC46E', accent: '#FFB0D0', text: '#F3EEFF', muted: '#ADA3C7', bg: '#120D24', 'bg-2': '#271C4A', income: '#A6D67E', expense: '#FF7A9A' },
+    { cyan: '#6A4BC4', blue: '#A67A00', violet: '#5E7F2E', accent: '#B0487A', text: '#1E1538', muted: '#615878', bg: '#F5F0FF', 'bg-2': '#E2D6FF', income: '#4A7A22', expense: '#C2335A' }),
+  T('miami', 'Miami 86', 'Fuchsia, soleil, piscine',
+    { cyan: '#FF3DCB', blue: '#FFE14D', violet: '#2EE6E6', accent: '#FF8A3D', text: '#FFF0FB', muted: '#C9A3C2', bg: '#1A0626', 'bg-2': '#320B4A', income: '#5EF2B0', expense: '#FF5470' },
+    { cyan: '#C2189A', blue: '#9A7400', violet: '#00838A', accent: '#C9510C', text: '#2A0838', muted: '#6E4E73', bg: '#EFFFFD', 'bg-2': '#FFE0F4', income: '#1E7F55', expense: '#C2263F' }),
 ];
+
+/** Variables du thème pour le mode courant (nuit ou jour). */
+export const themeVars = (t, dark) => (dark ? t.dark : t.light);
 
 export const themeById = (id) => THEMES.find((t) => t.id === id) || THEMES[0];
 

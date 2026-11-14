@@ -1,5 +1,5 @@
 /* Service worker mABOUrse : l'app s'ouvre et fonctionne sans connexion. Les données passent par le cache local + file d'attente (voir offlineStore). */
-const CACHE = 'mabourse-shell-v1';
+const CACHE = 'mabourse-shell-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo.png', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

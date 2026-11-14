@@ -41,6 +41,10 @@
 .theme-hologram {
   color-scheme: dark;
 }
+/* Mode jour : les variables --holo-* passent à la variante claire du thème (voir palette.js) */
+.theme-hologram:not(.dark) {
+  color-scheme: light;
+}
 
 /* ---------- Fond profond + halos ---------- */
 .theme-hologram body {
@@ -329,6 +333,68 @@
   background-clip: padding-box;
 }
 
+/* ---------- Mode jour : surfaces claires teintées, halos adoucis ---------- */
+.theme-hologram:not(.dark) .glass {
+  background: linear-gradient(155deg, hsl(var(--holo-bg) / 0.78), hsl(var(--holo-bg-2) / 0.62));
+  border-color: hsl(var(--holo-cyan) / 0.35);
+  box-shadow:
+    0 0 0 1px hsl(var(--holo-violet) / 0.06),
+    0 0 20px -8px hsl(var(--holo-cyan) / 0.35),
+    0 18px 34px -22px hsl(var(--holo-blue) / 0.4),
+    inset 0 1px 0 hsl(0 0% 100% / 0.7);
+}
+.theme-hologram:not(.dark) h1,
+.theme-hologram:not(.dark) h2,
+.theme-hologram:not(.dark) h3 {
+  text-shadow: 0 0 10px hsl(var(--holo-cyan) / 0.18);
+}
+.theme-hologram:not(.dark) .text-accent {
+  text-shadow: none;
+}
+.theme-hologram:not(.dark) .serif,
+.theme-hologram:not(.dark) .num {
+  text-shadow: none;
+}
+.theme-hologram:not(.dark) .bg-white,
+.theme-hologram:not(.dark) .bg-white\/60,
+.theme-hologram:not(.dark) .bg-ink-100\/70,
+.theme-hologram:not(.dark) .bg-cream\/40,
+.theme-hologram:not(.dark) .bg-sand\/60,
+.theme-hologram:not(.dark) .bg-sand\/70 {
+  background-color: hsl(var(--holo-bg-2) / 0.7);
+}
+.theme-hologram:not(.dark) .bg-cream\/85,
+.theme-hologram:not(.dark) .bg-cream\/95 {
+  background-color: hsl(var(--holo-bg) / 0.92);
+}
+.theme-hologram:not(.dark) .ring-sand-line {
+  --tw-ring-color: hsl(var(--holo-cyan) / 0.3);
+}
+.theme-hologram:not(.dark) .btn-primary {
+  background: linear-gradient(135deg, hsl(var(--holo-cyan)), hsl(var(--holo-violet)));
+  color: hsl(var(--holo-bg));
+  box-shadow: 0 10px 22px -12px hsl(var(--holo-blue) / 0.6);
+}
+.theme-hologram:not(.dark) .input {
+  background: hsl(0 0% 100% / 0.6);
+}
+.theme-hologram:not(.dark) [role='dialog'] {
+  background: linear-gradient(160deg, hsl(var(--holo-bg) / 0.97), hsl(var(--holo-bg-2) / 0.97));
+  box-shadow:
+    0 0 0 1px hsl(var(--holo-violet) / 0.1),
+    0 30px 60px -20px hsl(var(--holo-blue) / 0.35);
+}
+.theme-hologram:not(.dark) .nav-bubble-host {
+  background: hsl(var(--holo-bg) / 0.85);
+}
+.theme-hologram:not(.dark) .recharts-line-curve,
+.theme-hologram:not(.dark) .recharts-area-curve {
+  filter: none;
+}
+.theme-hologram:not(.dark) .recharts-tooltip-wrapper > div {
+  background: hsl(var(--holo-bg) / 0.97);
+}
+
 /* ---------- Version allégée (appareil lent) ---------- */
 .theme-hologram.holo-lite body::after,
 .theme-hologram.holo-lite .glass::after {
@@ -349,16 +415,4 @@
   animation: none;
 }
 
-/* ---------- Mouvement réduit : ni scintillement, ni déformation, ni respiration ---------- */
-@media (prefers-reduced-motion: reduce) {
-  .theme-hologram body::after,
-  .theme-hologram .glass::after,
-  .theme-hologram h1.serif {
-    animation: none;
-  }
-  .theme-hologram .glass:hover,
-  .theme-hologram .glass:active,
-  .theme-hologram .btn-primary:hover:not(:disabled) {
-    transform: none;
-  }
-}
+

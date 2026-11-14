@@ -1,9 +1,9 @@
 import { Check } from 'lucide-react';
 import Card from '../components/ui/Card';
-import { THEMES } from './palette';
+import { THEMES, themeVars } from './palette';
 import { useHologram } from './useHologram';
 
-const swatch = (t, k) => `hsl(${t.vars[`--holo-${k}`]})`;
+const swatch = (v, k) => `hsl(${v[`--holo-${k}`]})`;
 
 const ORIGIN = {
   id: 'origin',
@@ -14,26 +14,26 @@ const ORIGIN = {
   text: 'rgb(var(--mb-ink))',
 };
 
-const OPTIONS = [
+const options = (dark) => [
   ORIGIN,
-  ...THEMES.map((t) => ({
+  ...THEMES.map((t) => [t, themeVars(t, dark)]).map(([t, v]) => ({
     id: t.id,
     label: t.label,
     desc: t.desc,
-    bg: `linear-gradient(135deg, ${swatch(t, 'bg')}, ${swatch(t, 'bg-2')})`,
-    dots: ['cyan', 'blue', 'violet', 'accent'].map((k) => swatch(t, k)),
-    text: swatch(t, 'text'),
-    muted: swatch(t, 'muted'),
+    bg: `linear-gradient(135deg, ${swatch(v, 'bg')}, ${swatch(v, 'bg-2')})`,
+    dots: ['cyan', 'blue', 'violet', 'accent'].map((k) => swatch(v, k)),
+    text: swatch(v, 'text'),
+    muted: swatch(v, 'muted'),
   })),
 ];
 
 /** Carte des réglages : choix de l'apparence (design d'origine ou un thème de la surcouche). */
 export default function HologramToggle() {
-  const { appearance, setAppearance } = useHologram();
+  const { appearance, setAppearance, dark } = useHologram();
   return (
-    <Card title="Apparence" subtitle="Design d'origine, ou un thème en verre translucide avec halos et reflets.">
+    <Card title="Apparence" subtitle="Design d'origine, ou un thème en verre translucide. Chaque thème a sa version jour et sa version nuit.">
       <div role="radiogroup" aria-label="Thème" className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-        {OPTIONS.map((o) => {
+        {options(dark).map((o) => {
           const active = appearance === o.id;
           return (
             <button

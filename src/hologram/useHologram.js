@@ -2,13 +2,14 @@
  * Interrupteur du mode hologramme.
  * Ajoute/retire la classe `theme-hologram` sur <html> ; c'est la seule chose qui active la surcouche.
  * Sans cette classe, aucun style de hologram.css ne s'applique.
+ * Le mode jour/nuit de l'app (classe `dark`, voir useTheme) reste respecté : chaque thème a une
+ * variante nuit et une variante jour, échangées automatiquement quand la classe `dark` change.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { BASE_VARS, applyVars, themeById } from './palette';
+import { BASE_VARS, applyVars, themeById, themeVars } from './palette';
 
 const KEY = 'mabourse-hologram';
 const THEME = 'mabourse-hologram-theme'; // id du thème de la surcouche (voir THEMES dans palette.js)
-const THEME_KEY = 'mabourse-theme'; // clé existante de useTheme (lecture seule)
 const CLASS = 'theme-hologram';
 const EVENT = 'mabourse-hologram';
 const root = document.documentElement;
@@ -23,12 +24,24 @@ const readTheme = () => {
   }
 };
 
+const isDark = () => root.classList.contains('dark');
+
 function applyTheme(id) {
   const t = themeById(id);
-  applyVars(root, t.vars);
+  applyVars(root, themeVars(t, isDark()));
   root.dataset.holoTheme = t.id;
 }
 applyTheme(readTheme());
+
+// Bascule jour/nuit : on réapplique la bonne variante du thème courant.
+let lastDark = isDark();
+new MutationObserver(() => {
+  const d = isDark();
+  if (d === lastDark) return;
+  lastDark = d;
+  applyTheme(root.dataset.holoTheme);
+  window.dispatchEvent(new CustomEvent(EVENT));
+}).observe(root, { attributes: true, attributeFilter: ['class'] });
 
 const read = () => {
   try {
@@ -38,56 +51,17 @@ const read = () => {
   }
 };
 
-// Le mode hologramme est sombre par nature : tant qu'il est actif, on garde la classe `dark`
-// (sans toucher au choix clair/sombre enregistré par l'app, restauré à la désactivation).
-let keepDark = null;
-
-function originalDark() {
-  try {
-    const t = localStorage.getItem(THEME_KEY);
-    if (t) return t === 'dark';
-  } catch {
-    /* ignore */
-  }
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
-}
-
-/* Version allégée : appareil modeste ou cadence d'image mesurée trop basse. */
+/* Version allégée : uniquement sur un appareil vraiment modeste (les iPhone ne sont jamais concernés). */
 function detectLite() {
   const cores = navigator.hardwareConcurrency || 8;
   const mem = navigator.deviceMemory || 8;
-  if (cores <= 2 || mem <= 2) {
-    root.classList.add('holo-lite');
-    return;
-  }
-  let frames = 0;
-  let start = 0;
-  const probe = (t) => {
-    if (!start) start = t;
-    frames++;
-    if (t - start < 1000) requestAnimationFrame(probe);
-    else if (frames < 45) root.classList.add('holo-lite');
-  };
-  requestAnimationFrame(probe);
+  root.classList.toggle('holo-lite', cores <= 2 && mem <= 2);
 }
 
 function apply(on) {
   root.classList.toggle(CLASS, on);
-  if (on) {
-    root.classList.add('dark');
-    if (!keepDark) {
-      keepDark = new MutationObserver(() => {
-        if (root.classList.contains(CLASS) && !root.classList.contains('dark')) root.classList.add('dark');
-      });
-      keepDark.observe(root, { attributes: true, attributeFilter: ['class'] });
-    }
-    detectLite();
-  } else {
-    keepDark?.disconnect();
-    keepDark = null;
-    root.classList.remove('holo-lite');
-    root.classList.toggle('dark', originalDark());
-  }
+  if (on) detectLite();
+  else root.classList.remove('holo-lite');
 }
 
 export function setHologram(on) {
@@ -119,12 +93,12 @@ const currentAppearance = () =>
 if (read()) apply(true);
 
 export function useHologram() {
-  const [appearance, setApp] = useState(currentAppearance);
+  const [state, setState] = useState(() => ({ appearance: currentAppearance(), dark: isDark() }));
   useEffect(() => {
-    const sync = () => setApp(currentAppearance());
+    const sync = () => setState({ appearance: currentAppearance(), dark: isDark() });
     window.addEventListener(EVENT, sync);
     return () => window.removeEventListener(EVENT, sync);
   }, []);
   const toggle = useCallback(() => setHologram(!root.classList.contains(CLASS)), []);
-  return { on: appearance !== 'origin', toggle, appearance, setAppearance };
+  return { on: state.appearance !== 'origin', toggle, appearance: state.appearance, dark: state.dark, setAppearance };
 }
