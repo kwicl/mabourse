@@ -9,7 +9,7 @@ export default function KpiCard({
   label,
   value,
   icon: Icon,
-  tint,
+  tone = 'accent',
   trend,
   trendLabel = 'vs mois dernier',
   goodWhenUp = true,
@@ -27,7 +27,7 @@ export default function KpiCard({
         <span className="label truncate">{label}</span>
         <span className="flex items-center gap-1">
           {action}
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" style={{ background: `${tint}14`, color: tint }}>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" style={{ background: `rgb(var(--${tone}) / 0.16)`, color: `rgb(var(--${tone}-ink))` }}>
             <Icon size={15} strokeWidth={1.8} />
           </span>
         </span>
@@ -40,16 +40,16 @@ export default function KpiCard({
           <>
             <span
               className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-medium ${
-                good ? 'bg-income/10 text-income' : 'bg-expense/10 text-expense'
+                good ? 'bg-success/15 text-success' : 'bg-error/15 text-error'
               }`}
             >
               {trend >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
               {pct(trend)}
             </span>
-            <span className="text-ink-500 dark:text-ink-400">{trendLabel}</span>
+            <span className="text-fg-muted">{trendLabel}</span>
           </>
         ) : (
-          <span className="text-ink-500 dark:text-ink-400">{hint}</span>
+          <span className="text-fg-muted">{hint}</span>
         )}
       </div>
     </div>

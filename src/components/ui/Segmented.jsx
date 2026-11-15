@@ -2,7 +2,7 @@
 export default function Segmented({ options, value, onChange, size = 'md' }) {
   const pad = size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm';
   return (
-    <div className="inline-flex rounded-full border border-sand-line bg-ink-100/70 p-1 dark:border-night-line dark:bg-white/[0.03]">
+    <div className="inline-flex rounded-full border border-line bg-fg/5 p-1">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -12,10 +12,10 @@ export default function Segmented({ options, value, onChange, size = 'md' }) {
             onClick={() => onChange(o.value)}
             className={`${pad} shrink-0 whitespace-nowrap rounded-full font-medium transition-all duration-300 ease-out ${
               active
-                ? 'bg-white text-ink-900 shadow-soft dark:bg-white/[0.1] dark:text-ink-50'
+                ? 'bg-accent text-on-accent shadow-soft'
                 : o.soft
-                  ? 'bg-sand/70 text-ink-700 hover:text-ink-900 dark:bg-white/[0.06] dark:text-ink-200 dark:hover:text-ink-50'
-                  : 'text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100'
+                  ? 'bg-fg/10 text-fg hover:text-fg'
+                  : 'text-fg-muted hover:text-fg'
             }`}
           >
             {o.label}

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { CloudOff, Loader2, Moon, Plus, RefreshCw, Sun } from 'lucide-react';
+import { CloudOff, Loader2, Plus, RefreshCw } from 'lucide-react';
 import Sidebar, { MobileNav, NAV } from './components/layout/Sidebar';
 import { LogoMark } from './components/layout/Logo';
 import TransactionForm from './components/transactions/TransactionForm';
@@ -9,11 +9,12 @@ import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Stats from './pages/Stats';
 import Settings from './pages/Settings';
+import ThemesDemo from './pages/ThemesDemo';
+import OriginModeToggle from './components/OriginModeToggle';
 import { useFinance } from './context/FinanceContext';
 import { useHashRoute, navigate } from './hooks/useHashRoute';
-import { useTheme } from './hooks/useTheme';
 
-const PAGES = { dashboard: Dashboard, transactions: Transactions, budgets: Budgets, stats: Stats, settings: Settings };
+const PAGES = { dashboard: Dashboard, transactions: Transactions, budgets: Budgets, stats: Stats, settings: Settings, themes: ThemesDemo };
 
 function greeting() {
   const h = new Date().getHours();
@@ -22,7 +23,6 @@ function greeting() {
 
 export default function App() {
   const route = useHashRoute();
-  const { theme, toggle } = useTheme();
   const { status, error, online, pending, remote } = useFinance();
   const [form, setForm] = useState({ open: false, initial: null });
 
@@ -31,14 +31,14 @@ export default function App() {
   const close = useCallback(() => setForm((f) => ({ ...f, open: false })), []);
 
   const Page = PAGES[route] ?? Dashboard;
-  const nav = NAV.find((n) => n.id === route) ?? NAV[0];
+  const nav = route === 'themes' ? { label: 'Thèmes' } : NAV.find((n) => n.id === route) ?? NAV[0];
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
   if (status === 'locked') return <LockScreen />;
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar route={route} onAdd={openAdd} theme={theme} onToggleTheme={toggle} />
+      <Sidebar route={route} onAdd={openAdd} />
 
       <main className="mx-auto min-w-0 max-w-[1440px] flex-1 px-4 pb-28 pt-6 sm:px-6 lg:px-12 lg:pb-14 lg:pt-10">
         <header className="mb-7 flex items-end justify-between gap-4 lg:mb-10">
@@ -47,7 +47,7 @@ export default function App() {
               <LogoMark size={38} />
             </button>
             <div>
-              <p className="text-[13px] capitalize text-ink-500 dark:text-ink-400">{route === 'dashboard' ? `${greeting()} · ${today}` : today}</p>
+              <p className="text-[13px] capitalize text-fg-muted">{route === 'dashboard' ? `${greeting()} · ${today}` : today}</p>
               <h1 className="serif mt-0.5 text-[30px] leading-tight sm:text-[40px]">{nav.label}</h1>
             </div>
           </div>
@@ -58,9 +58,7 @@ export default function App() {
                 {online ? `${pending} en attente` : pending ? `Hors ligne · ${pending}` : 'Hors ligne'}
               </span>
             )}
-            <button onClick={toggle} className="btn-ghost h-10 w-10 !p-0 lg:hidden" aria-label="Changer de thème">
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            <OriginModeToggle className="lg:hidden" />
             <button onClick={openAdd} className="btn water-glow hidden sm:inline-flex lg:hidden">
               <Plus size={16} /> Ajouter
             </button>
@@ -68,14 +66,14 @@ export default function App() {
         </header>
 
         {status === 'loading' && (
-          <div className="flex h-[60vh] items-center justify-center text-ink-400">
+          <div className="flex h-[60vh] items-center justify-center text-fg-muted">
             <Loader2 className="animate-spin" />
           </div>
         )}
         {status === 'error' && (
           <div className="glass mx-auto max-w-md p-6 text-center">
             <p className="font-medium">Impossible de charger les données</p>
-            <p className="mt-1 text-sm text-ink-400">{error}</p>
+            <p className="mt-1 text-sm text-fg-muted">{error}</p>
             <button onClick={() => navigate('settings')} className="btn-primary mt-4">Vérifier les réglages</button>
           </div>
         )}

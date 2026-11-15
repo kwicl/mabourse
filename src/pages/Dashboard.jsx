@@ -69,8 +69,8 @@ function SeriesToggle({ visible, onToggle, totals, masked = [], series = SERIES 
             aria-pressed={on}
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-300 ease-out ${
               on
-                ? 'border-sand-line bg-white text-ink-900 shadow-soft dark:border-night-line dark:bg-white/[0.06] dark:text-ink-50'
-                : 'border-transparent bg-transparent text-ink-400 hover:bg-sand/40 hover:text-ink-700 dark:hover:bg-white/[0.03] dark:hover:text-ink-200'
+                ? 'border-transparent bg-accent text-on-accent shadow-soft'
+                : 'border-transparent bg-transparent text-fg-muted hover:bg-fg/10 hover:text-fg'
             }`}
           >
             <span
@@ -119,7 +119,7 @@ export default function Dashboard({ onEdit }) {
     <button
       type="button"
       onClick={togglePrivate}
-      className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 transition-all duration-300 ease-out hover:bg-sand/50 hover:text-ink-900 dark:hover:bg-white/[0.05] dark:hover:text-ink-50"
+      className="flex h-8 w-8 items-center justify-center rounded-full text-fg-muted transition-all duration-300 ease-out hover:bg-fg/10 hover:text-fg"
       aria-label={hidePrivate ? 'Afficher les montants' : 'Masquer les montants'}
       title={hidePrivate ? 'Afficher les montants' : 'Masquer les montants'}
     >
@@ -137,6 +137,7 @@ export default function Dashboard({ onEdit }) {
   const r = useMemo(() => periodRange(periodKey, transactions, custom), [periodKey, transactions, custom]);
   const base = PERIODS.find((p) => p.key === periodKey);
   const period = periodKey === 'custom' ? { ...base, label: rangeLabel(r.from, r.to) } : base;
+  const chart = useChartTheme();
   const s = useMemo(() => {
     const cur = totalsBetween(transactions, r.from, r.to);
     const prev = r.prevFrom ? totalsBetween(transactions, r.prevFrom, r.prevTo) : null;
@@ -151,13 +152,13 @@ export default function Dashboard({ onEdit }) {
       delta: cur.net,
       totals: { balance: endBalance, income: cur.income, expense: cur.expense },
       daily: series.map((d) => ({ date: d.date, expense: d.dayExpense })),
-      // Couleurs « crépuscule antique » attribuées par rang de dépense
-      rangeCats: paletteByRank(byCategoryRange(transactions, categories, r.from, r.to)),
+      // Couleurs du thème attribuées par rang de dépense
+      rangeCats: paletteByRank(byCategoryRange(transactions, categories, r.from, r.to), chart.ramp, chart.other),
       cats: byCategory(transactions, categories, m),
       accs: accountBalances(accounts, transactions),
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
     };
-  }, [transactions, categories, accounts, m, r]);
+  }, [transactions, categories, accounts, m, r, chart.ramp, chart.other]);
   // Un seul jour : les courbes couvrent les 7 derniers jours
   const chartLabel = r.chartFrom ? '7 derniers jours' : period.label;
   const trend = (k) => (s.prev ? change(s.cur[k], s.prev[k]) : NaN);
@@ -178,8 +179,8 @@ export default function Dashboard({ onEdit }) {
         <div
           className={`grid grid-cols-1 gap-1 rounded-2xl border p-2 transition-all duration-300 ease-out min-[420px]:grid-cols-2 sm:flex sm:items-center sm:gap-2 sm:rounded-full sm:p-1 sm:pl-4 ${
             periodKey === 'custom'
-              ? 'border-accent/40 bg-white shadow-soft dark:bg-white/[0.06]'
-              : 'border-sand-line bg-ink-100/70 dark:border-night-line dark:bg-white/[0.03]'
+              ? 'border-accent bg-fg/10 shadow-soft'
+              : 'border-line bg-fg/5'
           }`}
         >
           <label className="flex min-w-0 items-center gap-2 pl-2 sm:pl-0">
@@ -189,7 +190,7 @@ export default function Dashboard({ onEdit }) {
               value={r.from}
               max={r.to}
               onChange={(e) => chooseDate('from', e.target.value)}
-              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 sm:w-auto dark:focus:bg-white/[0.05]"
+              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-fg/10 sm:w-auto"
               aria-label="Date de début"
             />
           </label>
@@ -200,7 +201,7 @@ export default function Dashboard({ onEdit }) {
               value={r.to}
               min={r.from}
               onChange={(e) => chooseDate('to', e.target.value)}
-              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-white/70 sm:w-auto dark:focus:bg-white/[0.05]"
+              className="w-full min-w-0 rounded-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-fg/10 sm:w-auto"
               aria-label="Date de fin"
             />
           </label>
@@ -212,12 +213,12 @@ export default function Dashboard({ onEdit }) {
         {/* Dépenses de la période mises en avant */}
         <div className="glass glass-hover animate-fade-up relative col-span-2 min-w-0 overflow-hidden p-6 sm:p-8 xl:col-span-1">
           <div
-            className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-60 blur-3xl dark:opacity-40"
-            style={{ background: 'radial-gradient(circle, rgba(218,119,86,0.22), transparent 70%)' }}
+            className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-60 blur-3xl"
+            style={{ background: 'radial-gradient(circle, rgb(var(--accent) / 0.22), transparent 70%)' }}
           />
           <div className="relative flex items-center justify-between gap-2">
             <span className="label">Dépenses · {period.label}</span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-expense/10 text-expense">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-error">
               <ArrowUpRight size={16} strokeWidth={1.8} />
             </span>
           </div>
@@ -229,23 +230,23 @@ export default function Dashboard({ onEdit }) {
               <>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                    trend('expense') <= 0 ? 'bg-income/10 text-income' : 'bg-expense/10 text-expense'
+                    trend('expense') <= 0 ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
                   }`}
                 >
                   {pct(trend('expense'))}
                 </span>
-                <span className="text-ink-500 dark:text-ink-400">{period.vs}</span>
+                <span className="text-fg-muted">{period.vs}</span>
               </>
             ) : (
-              <span className="text-ink-500 dark:text-ink-400">{period.label}</span>
+              <span className="text-fg-muted">{period.label}</span>
             )}
           </div>
           <div className="relative mt-5 flex flex-wrap gap-2">
             {s.rangeCats.slice(0, 3).map((c) => (
-              <div key={c.id} className="badge !py-1 !text-xs">
+              <div key={c.id} className="chip !py-1 !text-xs">
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: c.color }} />
                 <span>{c.name}</span>
-                <span className="num font-semibold text-ink-900 dark:text-ink-50">
+                <span className="num font-semibold text-fg">
                   <Amount value={c.value} />
                 </span>
               </div>
@@ -256,7 +257,7 @@ export default function Dashboard({ onEdit }) {
           label="Solde total"
           value={s.balance}
           icon={Wallet}
-          tint="#CC5A37"
+          tone="accent"
           hint={s.accs.map((a) => a.name).join(' · ')}
           hidden={hidePrivate}
           action={eyeButton}
@@ -266,7 +267,7 @@ export default function Dashboard({ onEdit }) {
           label="Cash flow"
           value={s.cur.net}
           icon={Scale}
-          tint="#D97706"
+          tone="warning"
           trend={hidePrivate ? NaN : trend('net')}
           trendLabel={period.vs}
           hint={period.label}
@@ -278,7 +279,7 @@ export default function Dashboard({ onEdit }) {
           label="Revenus"
           value={s.cur.income}
           icon={ArrowDownLeft}
-          tint="#6F7F55"
+          tone="success"
           trend={hidePrivate ? NaN : trend('income')}
           trendLabel={period.vs}
           hint={period.label}
@@ -318,7 +319,7 @@ export default function Dashboard({ onEdit }) {
               {hidePrivate ? (
                 <span>••••••</span>
               ) : (
-                <span className={s.delta >= 0 ? 'text-income' : 'text-expense'}>{signedMoney(s.delta)}</span>
+                <span className={s.delta >= 0 ? 'text-success' : 'text-error'}>{signedMoney(s.delta)}</span>
               )}{' '}
               · {chartLabel}
             </span>
@@ -334,16 +335,16 @@ export default function Dashboard({ onEdit }) {
           <CategoryDonut data={s.rangeCats} showLegend={false} height={200} limit={5} />
           <ul className="mt-5 flex flex-col gap-1">
             {s.rangeCats.slice(0, 5).map((c) => (
-              <li key={c.id} className="rounded-lg px-2 py-1.5 text-sm transition-colors duration-300 hover:bg-sand/40 dark:hover:bg-white/[0.03]">
+              <li key={c.id} className="rounded-lg px-2 py-1.5 text-sm transition-colors duration-300 hover:bg-fg/10">
                 <div className="flex items-center gap-3">
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
-                  <span className="min-w-0 flex-1 truncate text-ink-600 dark:text-ink-300">{c.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-fg">{c.name}</span>
                   <span className="serif text-[15px]"><Amount value={c.value} /></span>
-                  <span className="num w-11 shrink-0 text-right text-xs font-medium text-ink-500 dark:text-ink-400">
+                  <span className="num w-11 shrink-0 text-right text-xs font-medium text-fg-muted">
                     {(c.share * 100).toFixed(c.share < 0.1 ? 1 : 0)} %
                   </span>
                 </div>
-                <div className="ml-5 mt-1.5 h-1 overflow-hidden rounded-full bg-sand/60 dark:bg-white/[0.05]">
+                <div className="ml-5 mt-1.5 h-1 overflow-hidden rounded-full bg-fg/10">
                   <div
                     className="h-full rounded-full transition-[width] duration-700 ease-out"
                     style={{ width: `${c.share * 100}%`, background: c.color, opacity: 0.85 }}
@@ -368,7 +369,7 @@ export default function Dashboard({ onEdit }) {
               <BudgetBar key={b.id} compact category={categoryById(b.categoryId, 'expense')} spent={b.spent} amount={Number(b.amount)} onClick={() => navigate('budgets')} />
             ))
           ) : (
-            <p className="py-8 text-center text-sm text-ink-400">Aucun budget défini.</p>
+            <p className="py-8 text-center text-sm text-fg-muted">Aucun budget défini.</p>
           )}
         </div>
       </Card>

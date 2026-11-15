@@ -31,8 +31,8 @@ function SavingsRate({ data }) {
           cursor={{ stroke: t.cursor, strokeDasharray: '4 4' }}
           content={({ active, payload, label }) =>
             active && payload?.length ? (
-              <div className="rounded-xl border border-sand-line bg-cream/95 px-3.5 py-2.5 text-xs shadow-lift backdrop-blur-md dark:border-night-line dark:bg-night-card/95">
-                <div className="mb-1 capitalize text-ink-500 dark:text-ink-400">{monthLabel(label, 'long')}</div>
+              <div className="rounded-xl border border-line surface-second px-3.5 py-2.5 text-xs shadow-lift backdrop-blur-md">
+                <div className="mb-1 capitalize text-fg-muted">{monthLabel(label, 'long')}</div>
                 <div className="serif text-[15px]">{payload[0].value} % épargné</div>
               </div>
             ) : null
@@ -64,8 +64,8 @@ export default function Stats() {
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {[
-          ['Revenu moyen', <Amount value={avg('income')} />, 'text-income'],
-          ['Dépense moyenne', <Amount value={avg('expense')} />, 'text-expense'],
+          ['Revenu moyen', <Amount value={avg('income')} />, 'text-success'],
+          ['Dépense moyenne', <Amount value={avg('expense')} />, 'text-error'],
           ['Épargne moyenne', <Amount value={avg('net')} />, ''],
           ['Meilleur mois', best ? monthLabel(best.key, 'long') : '—', 'capitalize'],
         ].map(([label, value, cls], i) => (
@@ -93,9 +93,9 @@ export default function Stats() {
         }
       >
         <MonthlyBars data={series} height={300} />
-        <div className="mt-3 flex justify-center gap-5 text-xs text-ink-500">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-income" />Revenus</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-expense" />Dépenses</span>
+        <div className="mt-3 flex justify-center gap-5 text-xs text-fg-muted">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success" />Revenus</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-error" />Dépenses</span>
         </div>
       </Card>
 
@@ -143,16 +143,16 @@ export default function Stats() {
                 const up = diff > 0;
                 const good = type === 'expense' ? !up : up;
                 return (
-                  <tr key={c.id} className="border-t border-sand-line transition-colors duration-300 hover:bg-sand/30 dark:border-night-line dark:hover:bg-white/[0.02]">
+                  <tr key={c.id} className="border-t border-line transition-colors duration-300 hover:bg-fg/10">
                     <td className="py-2.5">
                       <span className="flex items-center gap-3">
-                        <CategoryIcon icon={c.icon} color={c.color} size={30} />
+                        <CategoryIcon icon={c.icon} size={30} />
                         {c.name}
                       </span>
                     </td>
-                    <td className="num py-2.5 text-right text-ink-400"><Amount value={prev} /></td>
+                    <td className="num py-2.5 text-right text-fg-muted"><Amount value={prev} /></td>
                     <td className="num py-2.5 text-right font-medium"><Amount value={c.value} /></td>
-                    <td className={`num py-2.5 text-right ${Number.isFinite(diff) ? (good ? 'text-income' : 'text-expense') : 'text-ink-400'}`}>
+                    <td className={`num py-2.5 text-right ${Number.isFinite(diff) ? (good ? 'text-success' : 'text-error') : 'text-fg-muted'}`}>
                       {Number.isFinite(diff) ? pct(diff) : 'nouveau'}
                     </td>
                   </tr>
@@ -160,7 +160,7 @@ export default function Stats() {
               })}
             </tbody>
           </table>
-          {!cats.length && <p className="py-8 text-center text-sm text-ink-400">Aucune donnée pour ce mois.</p>}
+          {!cats.length && <p className="py-8 text-center text-sm text-fg-muted">Aucune donnée pour ce mois.</p>}
         </div>
       </Card>
     </div>

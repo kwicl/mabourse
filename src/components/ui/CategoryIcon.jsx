@@ -43,12 +43,13 @@ export const ICONS = {
   Zap,
 };
 
-export default function CategoryIcon({ icon, color = '#8e8e98', size = 40, className = '' }) {
+/** Icône de catégorie : neutre (texte de la surface) ; `color` = couleur de graphique du thème (légendes). */
+export default function CategoryIcon({ icon, color, size = 40, className = '' }) {
   const Icon = ICONS[icon] || Circle;
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-black/[0.03] dark:ring-white/[0.04] ${className}`}
-      style={{ width: size, height: size, background: `${color}17`, color }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-fg/10 ${className}`}
+      style={{ width: size, height: size, background: color ? `${color}2E` : 'rgb(var(--fg) / 0.08)', color: color || 'rgb(var(--fg))' }}
     >
       <Icon size={Math.round(size * 0.42)} strokeWidth={1.8} />
     </span>

@@ -2,45 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bordure lumineuse (style Google AI Studio) : le dégradé glisse de gauche à droite en boucle.
-   Image = 2 périodes ; décalage de 100% = exactement 1 période -> boucle sans couture. */
-@keyframes glow-slide {
-  from {
-    background-position: 0% 0;
-  }
-  to {
-    background-position: 100% 0;
-  }
-}
-
+/*
+ * Surfaces 60 / 30 / 10 : chaque surface fixe sa couleur de texte (--fg), son texte atténué
+ * (--fg-muted) et les variantes lisibles de l'accent et des couleurs d'état. Les tokens bruts
+ * (--main, --second, --accent…) sont injectés par src/theme/useAppTheme.js ([data-theme="…"]).
+ */
 @layer base {
+  [data-theme],
+  .surface-main {
+    --surface: var(--main);
+    --fg: var(--on-main);
+    --fg-muted: var(--m-muted);
+    --accent-ink: var(--m-accent-ink);
+    --success-ink: var(--m-success-ink);
+    --warning-ink: var(--m-warning-ink);
+    --error-ink: var(--m-error-ink);
+  }
+  .surface-second,
+  .glass,
+  .input,
+  .nav-bar {
+    --surface: var(--second);
+    --fg: var(--on-second);
+    --fg-muted: var(--s-muted);
+    --accent-ink: var(--s-accent-ink);
+    --success-ink: var(--s-success-ink);
+    --warning-ink: var(--s-warning-ink);
+    --error-ink: var(--s-error-ink);
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv11', 'ss01';
+    transition: background-color 0.3s ease-out;
   }
   body {
-    @apply bg-cream text-ink-900 dark:bg-night dark:text-ink-100;
+    background-color: rgb(var(--main));
+    color: rgb(var(--fg));
     min-height: 100vh;
-  }
-  /* Lumière chaude, très diffuse */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(700px 420px at 90% -10%, rgba(218, 119, 86, 0.08), transparent 70%),
-      radial-gradient(600px 420px at -10% 110%, rgba(217, 119, 6, 0.05), transparent 70%);
-  }
-  .dark body::before {
-    background:
-      radial-gradient(700px 420px at 90% -10%, rgba(218, 119, 86, 0.10), transparent 70%),
-      radial-gradient(600px 420px at -10% 110%, rgba(217, 119, 6, 0.05), transparent 70%);
-  }
-  .dark {
-    color-scheme: dark;
   }
   /* iOS/Android : les champs date/select ont une largeur intrinsèque qui déborde de la grille */
   input[type='date'],
@@ -62,131 +62,69 @@
     min-height: 1.4em;
   }
   ::selection {
-    background: rgba(204, 90, 55, 0.18);
+    background: rgb(var(--accent) / 0.3);
   }
 }
 
 @layer components {
+  .surface-main {
+    background-color: rgb(var(--main));
+    color: rgb(var(--fg));
+  }
+  .surface-second {
+    background-color: rgb(var(--second));
+    color: rgb(var(--fg));
+  }
+  /* Carte (30 %) */
   .glass {
-    @apply rounded-2xl border border-sand-line bg-white/65 shadow-soft backdrop-blur-md
-      transition-all duration-300 ease-out
-      dark:border-night-line dark:bg-night-card/80 dark:shadow-none;
+    @apply rounded-2xl border border-line shadow-soft transition-all duration-300 ease-out;
+    background-color: rgb(var(--second));
+    color: rgb(var(--fg));
   }
   .glass-hover {
-    @apply hover:-translate-y-px hover:shadow-lift dark:hover:border-ink-600;
+    @apply hover:-translate-y-px hover:shadow-lift;
   }
   .label {
-    @apply text-[11px] font-medium uppercase tracking-[0.1em] text-ink-500 dark:text-ink-400;
+    @apply text-[11px] font-medium uppercase tracking-[0.1em] text-fg-muted;
   }
   .serif {
     @apply font-serif font-normal tracking-[-0.015em];
     font-variant-numeric: lining-nums tabular-nums;
   }
+  /* Champ de saisie (30 %) */
   .input {
-    @apply w-full rounded-xl border border-sand-line bg-white/70 px-4 py-3 text-[15px] outline-none
-      transition-all duration-300 ease-out placeholder:text-ink-400
-      focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/10
-      dark:border-night-line dark:bg-white/[0.03] dark:focus:bg-white/[0.05];
+    @apply w-full rounded-xl border border-line px-4 py-3 text-[15px] outline-none
+      transition-all duration-300 ease-out placeholder:text-fg-muted
+      focus:border-accent focus:ring-4 focus:ring-accent/25;
+    background-color: rgb(var(--second));
+    color: rgb(var(--fg));
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium
       transition-all duration-300 ease-out active:scale-[0.98] disabled:opacity-50;
   }
+  /* CTA (10 %) */
   .btn-primary {
-    @apply btn bg-ink-900 text-cream hover:bg-accent dark:bg-cream dark:text-ink-900 dark:hover:bg-accent-soft dark:hover:text-white;
+    @apply btn bg-accent text-on-accent hover:shadow-glow hover:brightness-105;
   }
   .btn-ghost {
-    @apply btn text-ink-500 hover:bg-sand/50 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-white/[0.05] dark:hover:text-ink-50;
+    @apply btn text-fg-muted hover:bg-fg/10 hover:text-fg;
   }
   .num {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-fg/10 px-2.5 py-0.5 text-[11px] font-medium text-fg;
+  }
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full border border-sand-line bg-ink-100/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-500
-      dark:border-night-line dark:bg-white/[0.04] dark:text-ink-400;
-  }
-  /* Bouton sombre #1e1f20 + bordure dégradée 2px bleu-violet-rose + halo diffus animé (CSS pur, 60 FPS) */
-  .ai-glow {
-    position: relative;
-    isolation: isolate;
-    background: #1e1f20;
-    color: #fff;
-    transform: translateZ(0);
-    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-  }
-  .ai-glow::before,
-  .ai-glow::after {
-    content: '';
-    position: absolute;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(90deg, #4285f4, #a3e635, #d96570, #4285f4, #a3e635, #d96570, #4285f4) 0% 0% / 200% 100%;
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    animation: glow-slide 3s linear infinite;
-    will-change: background-position;
-  }
-  /* Bordure fine 2px */
-  .ai-glow::before {
-    inset: 0;
-    padding: 2px;
-  }
-  /* Halo diffus */
-  .ai-glow::after {
-    inset: -4px;
-    padding: 6px;
-    filter: blur(9px);
-    opacity: 0.5;
-    z-index: -1;
-    transition: opacity 0.35s ease-out;
-  }
-  .ai-glow:hover:not(:disabled)::after {
-    opacity: 1;
-  }
-  .ai-glow:disabled::before,
-  .ai-glow:disabled::after {
-    animation-play-state: paused;
-  }
-
-}
-
-/* Contour des zones : bordure terre cuite lumineuse qui respire doucement (hors thème hologramme) */
-@keyframes orange-breathe {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 1px rgba(232, 120, 60, 0.55),
-      0 0 14px -2px rgba(240, 130, 60, 0.45),
-      0 0 32px -10px rgba(240, 120, 50, 0.4);
-  }
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(240, 135, 70, 0.8),
-      0 0 20px -2px rgba(245, 140, 65, 0.6),
-      0 0 44px -10px rgba(245, 125, 55, 0.5);
+    @apply inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-medium text-on-accent;
   }
 }
-:root:not(.theme-hologram) .glass {
-  border-color: rgba(236, 128, 66, 0.75);
-  animation: orange-breathe 4.5s ease-in-out infinite;
-}
-/* L'animation d'entrée reste jouée ; le halo prend le relais */
-:root:not(.theme-hologram) .glass.animate-fade-up {
-  animation:
-    fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
-    orange-breathe 4.5s ease-in-out 0.6s infinite;
-}
-:root:not(.theme-hologram) .glass:hover {
-  border-color: rgba(245, 145, 80, 0.95);
-}
-
 
 /* Caisse : chiffres qui défilent + montant ajouté qui s'envole */
 .cash-rolling {
-  color: #e8783c;
-  text-shadow: 0 0 12px rgba(240, 130, 60, 0.55);
+  color: rgb(var(--accent-ink));
   transition: color 0.3s ease-out;
 }
 @keyframes cash-fly {
@@ -213,8 +151,7 @@
   font-family: inherit;
   font-size: 0.42em;
   font-weight: 600;
-  color: #e8783c;
-  text-shadow: 0 0 10px rgba(240, 130, 60, 0.6);
+  color: rgb(var(--accent-ink));
   pointer-events: none;
   animation: cash-fly 1.8s ease-out forwards;
 }
@@ -230,7 +167,7 @@
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(143, 138, 132, 0.28);
+  background: rgb(var(--fg) / 0.25);
   border-radius: 999px;
   border: 3px solid transparent;
   background-clip: padding-box;

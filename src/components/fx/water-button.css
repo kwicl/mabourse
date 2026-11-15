@@ -1,21 +1,17 @@
 /*
- * Boutons « bulle d'eau » (remplacent la bordure lumineuse .ai-glow sur les boutons d'ajout
- * et de validation). Verre transparent teinté de l'accent, oscillations liquides marquées.
+ * Boutons « bulle d'eau » (CTA : ajout, validation). Fond accent (10 %), texte « textOnAccent ».
  * Le contenu (icône, texte) reste immobile : seule la « goutte » (::before) oscille.
- * Couleurs : variables de palette.js (tailwind.config.js), aucune valeur codée en dur.
+ * Couleurs : tokens du thème uniquement.
  */
 .water-glow {
   position: relative;
   isolation: isolate;
   background: transparent;
-  color: rgb(var(--mb-ink-900));
+  color: rgb(var(--on-accent));
   -webkit-tap-highlight-color: transparent;
 }
-.dark .water-glow {
-  color: rgb(var(--mb-ink));
-}
 .water-glow:focus-visible {
-  outline: 2px solid rgb(var(--mb-accent));
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 3px;
 }
 
@@ -26,17 +22,10 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(
-    130% 100% at 30% 15%,
-    rgb(var(--mb-accent-soft) / 0.1),
-    rgb(var(--mb-accent) / 0.24) 70%,
-    rgb(var(--mb-accent) / 0.34)
-  );
-  border: 1.5px solid rgb(var(--mb-accent) / 0.5);
+  background: rgb(var(--accent));
   box-shadow:
-    inset 0 2px 4px rgb(var(--mb-ink) / 0.65),
-    inset 0 -6px 10px rgb(var(--mb-accent) / 0.35),
-    0 8px 20px -10px rgb(var(--mb-accent) / 0.7);
+    inset 0 2px 4px rgb(var(--accent-hi) / 0.8),
+    0 8px 20px -10px rgb(var(--accent) / 0.8);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   animation: water-wobble 2.6s ease-in-out infinite;
@@ -54,7 +43,7 @@
   z-index: -1;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, rgb(var(--mb-ink) / 0.7), rgb(var(--mb-ink) / 0) 70%);
+  background: radial-gradient(ellipse at center, rgb(var(--accent-hi) / 0.85), rgb(var(--accent-hi) / 0) 70%);
   animation: water-shine 2.6s ease-in-out infinite;
   will-change: transform;
 }
@@ -152,29 +141,9 @@
   }
 }
 
-/* Mode hologramme : goutte cyan / violet */
-.theme-hologram .water-glow {
-  color: hsl(var(--holo-text));
-}
-.theme-hologram .water-glow::before {
-  background: radial-gradient(
-    130% 100% at 30% 15%,
-    hsl(var(--holo-cyan) / 0.12),
-    hsl(var(--holo-blue) / 0.22) 65%,
-    hsl(var(--holo-violet) / 0.3)
-  );
-  border-color: hsl(var(--holo-cyan) / 0.55);
-  box-shadow:
-    inset 0 2px 4px hsl(var(--holo-text) / 0.55),
-    inset 0 -6px 10px hsl(var(--holo-violet) / 0.4),
-    0 0 18px -4px hsl(var(--holo-cyan) / 0.6);
-}
-.theme-hologram .water-glow::after {
-  background: radial-gradient(ellipse at center, hsl(var(--holo-text) / 0.75), hsl(var(--holo-text) / 0) 70%);
-}
 
 /* Appareil lent */
-.holo-lite .water-glow::before {
+.fx-lite .water-glow::before {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }

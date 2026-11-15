@@ -14,24 +14,24 @@ function Row({ t, onSelect }) {
   const sub = isTransfer
     ? `${accountById(t.accountId)?.name ?? '?'} → ${accountById(t.toAccountId)?.name ?? '?'}`
     : [note, accountById(t.accountId)?.name].filter(Boolean).join(' · ');
-  const color = t.type === 'income' ? 'text-income' : t.type === 'expense' ? 'text-ink-900 dark:text-ink-50' : 'text-ink-400';
+  const color = t.type === 'income' ? 'text-success' : t.type === 'expense' ? 'text-fg' : 'text-fg-muted';
   const sign = t.type === 'income' ? '+' : t.type === 'expense' ? '−' : '';
 
   return (
     <button
       onClick={() => onSelect?.(t)}
-      className="group flex w-full items-start gap-3.5 rounded-xl px-2.5 py-2.5 text-left transition-all duration-300 ease-out hover:bg-sand/40 dark:hover:bg-white/[0.03]"
+      className="group flex w-full items-start gap-3.5 rounded-xl px-2.5 py-2.5 text-left transition-all duration-300 ease-out hover:bg-fg/10"
     >
       {isTransfer ? (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink-200/50 text-ink-500 ring-1 ring-inset ring-black/[0.03] dark:bg-white/[0.05]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-fg/10 text-fg-muted ring-1 ring-inset ring-fg/10">
           <ArrowLeftRight size={17} strokeWidth={1.8} />
         </span>
       ) : (
-        <CategoryIcon icon={cat?.icon} color={cat?.color} />
+        <CategoryIcon icon={cat?.icon} />
       )}
       <span className="min-w-0 flex-1">
         <span className="block break-words text-[14px] font-medium leading-snug">{title}</span>
-        {sub && <span className="block break-words text-[12.5px] leading-snug text-ink-500 dark:text-ink-400">{sub}</span>}
+        {sub && <span className="block break-words text-[12.5px] leading-snug text-fg-muted">{sub}</span>}
       </span>
       <span className={`num shrink-0 whitespace-nowrap pt-0.5 text-[14px] font-medium transition-transform duration-300 ease-out group-hover:-translate-x-0.5 ${color}`}>
         {sign}
@@ -43,7 +43,7 @@ function Row({ t, onSelect }) {
 
 /** Liste de transactions groupée par jour. */
 export default function TransactionList({ transactions, onSelect, grouped = true, empty = 'Aucune opération.' }) {
-  if (!transactions.length) return <p className="py-12 text-center text-sm text-ink-500">{empty}</p>;
+  if (!transactions.length) return <p className="py-12 text-center text-sm text-fg-muted">{empty}</p>;
   if (!grouped) return transactions.map((t) => <Row key={t.id} t={t} onSelect={onSelect} />);
 
   const groups = [];
@@ -60,9 +60,9 @@ export default function TransactionList({ transactions, onSelect, grouped = true
         return (
           <div key={g.date}>
             <div className="mb-1.5 flex items-center justify-between gap-3 px-1">
-              <span className="badge capitalize">{relativeDayLabel(g.date)}</span>
-              <span className="h-px flex-1 bg-sand-line dark:bg-night-line" />
-              <span className={`num text-xs ${net >= 0 ? 'text-income' : 'text-ink-500 dark:text-ink-400'}`}>
+              <span className="chip capitalize">{relativeDayLabel(g.date)}</span>
+              <span className="h-px flex-1 bg-line" />
+              <span className={`num text-xs ${net >= 0 ? 'text-success' : 'text-fg-muted'}`}>
                 {net >= 0 ? '+' : '−'}
                 <Amount value={Math.abs(net)} />
               </span>

@@ -14,9 +14,9 @@ export function niceTicks(min, max, from0 = false) {
   return { domain: [lo, hi], ticks: Array.from({ length: Math.round((hi - lo) / step) + 1 }, (_, i) => lo + i * step) };
 }
 
-/** Couleur de chaque série (le solde suit l'encre du thème). */
+/** Couleur de chaque série : tokens du thème (le solde suit le texte des cartes, l'épargne l'accent). */
 export function seriesColors(t) {
-  return { balance: t.dark ? '#E6E0D4' : '#33302D', income: t.income, expense: t.expense, saving: t.accent };
+  return { balance: t.ink, income: t.income, expense: t.expense, saving: t.accent };
 }
 
 /**

@@ -29,7 +29,7 @@ export default function SourceSyncButton({ className = 'btn-ghost w-full justify
         {importing && <Loader2 size={14} className="animate-spin" />}
       </button>
       {result && (
-        <p className={`flex items-start gap-1.5 px-3 text-[11px] leading-snug ${result.ok ? 'text-income' : 'text-expense'}`}>
+        <p className={`flex items-start gap-1.5 px-3 text-[11px] leading-snug ${result.ok ? 'text-success' : 'text-error'}`}>
           {result.ok ? <CheckCircle2 size={12} className="mt-px shrink-0" /> : <XCircle size={12} className="mt-px shrink-0" />}
           {result.msg}
         </p>

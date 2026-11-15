@@ -5,7 +5,7 @@ import { getConfig, saveConfig } from '../config';
 import { ping, resetLocalData, seedRemote } from '../services/sheetService';
 import { useFinance } from '../context/FinanceContext';
 import SourceSyncButton from '../components/SourceSyncButton';
-import HologramToggle from '../hologram/HologramToggle';
+import ThemePicker from '../components/ThemePicker';
 
 export default function Settings() {
   const { refresh, remote, proxy, lock } = useFinance();
@@ -31,7 +31,7 @@ export default function Settings() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
-      <HologramToggle />
+      <ThemePicker />
       {proxy && (
         <Card title="Accès sécurisé" subtitle="Connecté à Google Sheets via le serveur Vercel ; le jeton ne quitte jamais le serveur.">
           <button onClick={lock} className="btn-primary">
@@ -88,7 +88,7 @@ export default function Settings() {
           </div>
 
           {state.msg && (
-            <p className={`flex items-center gap-2 text-sm ${state.ok ? 'text-income' : 'text-expense'}`}>
+            <p className={`flex items-center gap-2 text-sm ${state.ok ? 'text-success' : 'text-error'}`}>
               {state.ok ? <CheckCircle2 size={16} /> : <XCircle size={16} />} {state.msg}
             </p>
           )}
@@ -102,7 +102,7 @@ export default function Settings() {
       )}
 
       <Card title="Configuration en 5 étapes">
-        <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-ink-600 dark:text-ink-300">
+        <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-fg">
           <li>Créez un Google Sheet vide.</li>
           <li>Ouvrez <b>Extensions › Apps Script</b> et collez <code>google-apps-script/Code.gs</code>.</li>
           <li>Exécutez la fonction <code>setup</code> une fois (crée les feuilles Transactions, Categories, Budgets, Accounts).</li>

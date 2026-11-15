@@ -31,7 +31,7 @@ export default function MonthlyBars({ data, height = 280 }) {
         <YAxis tickFormatter={compact} tick={{ fill: t.axis, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
         <Tooltip
           content={<ChartTooltip labelFormatter={(k) => monthLabel(k, 'long')} />}
-          cursor={{ fill: t.dark ? 'rgba(251,249,245,0.04)' : 'rgba(230,224,212,0.45)', radius: 10 }}
+          cursor={{ fill: t.track, radius: 10 }}
         />
         <Bar dataKey="income" name="Revenus" fill="url(#barIncome)" radius={[6, 6, 2, 2]} maxBarSize={22} animationDuration={800} />
         <Bar dataKey="expense" name="Dépenses" fill="url(#barExpense)" radius={[6, 6, 2, 2]} maxBarSize={22} animationDuration={800} />

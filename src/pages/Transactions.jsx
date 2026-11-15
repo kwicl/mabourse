@@ -65,7 +65,7 @@ export default function Transactions({ onEdit }) {
               ]}
             />
             <div className="relative w-full sm:w-64">
-              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-400" />
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg-muted" />
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher une note" className="input !py-2.5 !pl-10" />
             </div>
           </div>
@@ -89,9 +89,9 @@ export default function Transactions({ onEdit }) {
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="input !py-2.5" aria-label="Au" />
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            <span className="text-ink-400">{filtered.length} opérations</span>
-            <span className="num text-income">+<Amount value={totals.income} /></span>
-            <span className="num text-expense">−<Amount value={totals.expense} /></span>
+            <span className="text-fg-muted">{filtered.length} opérations</span>
+            <span className="num text-success">+<Amount value={totals.income} /></span>
+            <span className="num text-error">−<Amount value={totals.expense} /></span>
             {hasFilters && (
               <button onClick={reset} className="btn-ghost ml-auto !py-1 text-xs">
                 <X size={14} /> Réinitialiser

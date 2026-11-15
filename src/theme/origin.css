@@ -1,0 +1,134 @@
+/*
+ * Design d'origine « Pantheon » (thèmes origine / origine-nuit) : fond Parthénon au crépuscule sous
+ * un voile, cartes en verre translucide, contour terre cuite qui respire, boutons « bulle d'eau »
+ * en verre teinté. Couleurs : tokens du thème (dont --pt-* relevés dans l'image), rien en dur.
+ */
+[data-theme^='origine'] {
+  --pt-image: url('/bg-parthenon.jpg');
+  --pt-pos: 30% 70%;
+}
+
+/* Fond : calque fixe (fonctionne aussi sur iOS, où background-attachment: fixed est ignoré) */
+html[data-theme^='origine'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* Jour : voile marbre, plus dense en haut (titre, date) */
+html[data-theme='origine'] body::before {
+  background:
+    linear-gradient(180deg, rgb(var(--main) / 0.82) 0%, rgb(var(--pt-marble) / 0.6) 50%, rgb(var(--main) / 0.74) 100%),
+    var(--pt-image) var(--pt-pos) / cover no-repeat;
+}
+/* Nuit : voile ardoise léger, le couchant reste visible */
+html[data-theme='origine-nuit'] body::before {
+  background:
+    radial-gradient(90% 60% at 100% 100%, rgb(var(--pt-sunset) / 0.18), transparent 70%),
+    linear-gradient(180deg, rgb(var(--pt-slate) / 0.78) 0%, rgb(var(--pt-slate) / 0.56) 25%, rgb(var(--pt-slate) / 0.36) 55%, rgb(var(--pt-slate) / 0.56) 100%),
+    var(--pt-image) var(--pt-pos) / cover no-repeat;
+}
+html[data-theme^='origine'] body {
+  background-color: transparent;
+}
+
+/* Cartes en verre + contour terre cuite lumineux qui respire */
+@keyframes origin-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(var(--accent) / 0.55),
+      0 0 14px -2px rgb(var(--accent) / 0.45),
+      0 0 32px -10px rgb(var(--accent) / 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgb(var(--accent) / 0.8),
+      0 0 20px -2px rgb(var(--accent) / 0.6),
+      0 0 44px -10px rgb(var(--accent) / 0.5);
+  }
+}
+[data-theme^='origine'] .glass {
+  background-color: rgb(var(--second) / 0.65);
+  border-color: rgb(var(--accent) / 0.75);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: origin-breathe 4.5s ease-in-out infinite;
+}
+[data-theme^='origine'] .glass.animate-fade-up {
+  animation:
+    fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    origin-breathe 4.5s ease-in-out 0.6s infinite;
+}
+[data-theme='origine-nuit'] .glass {
+  background-color: rgb(var(--pt-slate) / 0.66);
+  border-color: rgb(var(--pt-marble) / 0.1);
+}
+
+/* Champs, panneaux et navigation translucides */
+[data-theme^='origine'] .input {
+  background-color: rgb(var(--second) / 0.7);
+}
+[data-theme='origine-nuit'] .input,
+[data-theme='origine-nuit'] .surface-second {
+  background-color: rgb(var(--pt-slate) / 0.72);
+}
+[data-theme^='origine'] .nav-bar {
+  background-color: rgb(var(--main) / 0.6);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+[data-theme='origine-nuit'] .nav-bar {
+  background-color: rgb(var(--pt-slate) / 0.8);
+}
+
+/* Bouton principal d'origine : encre sombre (jour) / claire (nuit) */
+[data-theme^='origine'] .btn-primary {
+  background-color: rgb(var(--on-main));
+  color: rgb(var(--main));
+}
+
+/* Navigation : élément actif en verre clair, icône terre cuite */
+[data-theme^='origine'] aside nav button[aria-current='page'] {
+  background-color: rgb(var(--second) / 0.85);
+  color: rgb(var(--fg));
+}
+[data-theme='origine-nuit'] aside nav button[aria-current='page'] {
+  background-color: rgb(var(--on-second) / 0.08);
+}
+[data-theme^='origine'] aside nav button[aria-current='page'] svg,
+[data-theme^='origine'] .nav-bubble-host > button[aria-current='page'] {
+  color: rgb(var(--accent-ink));
+}
+
+/* Bulle de navigation : verre teinté d'accent */
+[data-theme^='origine'] .nav-bubble__body {
+  background: rgb(var(--accent) / 0.17);
+  border: 1px solid rgb(var(--accent) / 0.45);
+  box-shadow:
+    inset 0 2px 3px rgb(var(--main) / 0.45),
+    inset 0 -4px 7px rgb(var(--accent) / 0.3);
+}
+[data-theme^='origine'] .nav-bubble__shine {
+  background: radial-gradient(ellipse at center, rgb(var(--main) / 0.55), rgb(var(--main) / 0) 70%);
+}
+
+/* Boutons « bulle d'eau » : verre transparent teinté de l'accent, texte encre */
+[data-theme^='origine'] .water-glow {
+  color: rgb(var(--fg));
+}
+[data-theme^='origine'] .water-glow::before {
+  background: radial-gradient(130% 100% at 30% 15%, rgb(var(--accent-hi) / 0.1), rgb(var(--accent) / 0.24) 70%, rgb(var(--accent) / 0.34));
+  border: 1.5px solid rgb(var(--accent) / 0.5);
+  box-shadow:
+    inset 0 2px 4px rgb(var(--main) / 0.65),
+    inset 0 -6px 10px rgb(var(--accent) / 0.35),
+    0 8px 20px -10px rgb(var(--accent) / 0.7);
+}
+[data-theme^='origine'] .water-glow::after {
+  background: radial-gradient(ellipse at center, rgb(var(--main) / 0.7), rgb(var(--main) / 0) 70%);
+}
+html[data-theme='origine-nuit'] .water-glow::after {
+  background: radial-gradient(ellipse at center, rgb(var(--on-main) / 0.35), rgb(var(--on-main) / 0) 70%);
+}

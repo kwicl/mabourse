@@ -45,7 +45,7 @@ export default function Amount({ value, sign = '', hidden = false, className = '
   return (
     <span className={`relative whitespace-nowrap ${className}`}>
       <span className={rolling ? 'cash-rolling' : ''}>{hidden ? '••••••' : `${sign}${number}`}</span>
-      <span className="ml-[0.25em] font-sans text-[0.55em] font-medium tracking-wide text-ink-400 dark:text-ink-500">{currency}</span>
+      <span className="ml-[0.25em] font-sans text-[0.55em] font-medium tracking-wide text-fg-muted">{currency}</span>
       {delta && !hidden && (
         <span key={delta.key} className="cash-delta" aria-hidden="true">
           {signedMoney(delta.v)}

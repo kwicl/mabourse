@@ -10,6 +10,7 @@ import { useFinance } from '../context/FinanceContext';
 import { byCategory } from '../utils/stats';
 import { monthKey, todayISO } from '../utils/format';
 import Amount from '../components/ui/Amount';
+import { useChartTheme } from '../hooks/useChartTheme';
 
 function BudgetForm({ open, onClose, initial }) {
   const { categories, budgets, budgetsApi } = useFinance();
@@ -63,10 +64,10 @@ function BudgetForm({ open, onClose, initial }) {
                 key={c.id}
                 onClick={() => setCategoryId(c.id)}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl p-2 text-[11px] font-medium transition ${
-                  categoryId === c.id ? 'bg-white shadow-soft ring-1 ring-accent/50 dark:bg-white/[0.06]' : 'hover:bg-sand/40 dark:hover:bg-white/[0.03]'
+                  categoryId === c.id ? 'bg-fg/10 ring-2 ring-accent' : 'hover:bg-fg/10'
                 }`}
               >
-                <CategoryIcon icon={c.icon} color={c.color} size={38} />
+                <CategoryIcon icon={c.icon} size={38} />
                 <span className="w-full truncate text-center">{c.name}</span>
               </button>
             ))}
@@ -76,10 +77,10 @@ function BudgetForm({ open, onClose, initial }) {
           <span className="label">Limite mensuelle</span>
           <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" className="input num text-lg" />
         </label>
-        {err && <p className="text-sm text-expense">{err}</p>}
+        {err && <p className="text-sm text-error">{err}</p>}
         <div className="flex gap-2">
           {initial && (
-            <button type="button" onClick={del} className="btn-ghost !text-expense" aria-label="Supprimer">
+            <button type="button" onClick={del} className="btn-ghost !text-error" aria-label="Supprimer">
               <Trash2 size={16} />
             </button>
           )}
@@ -106,8 +107,9 @@ export default function Budgets() {
   const spent = rows.reduce((s, r) => s + r.spent, 0);
   const ratio = total ? spent / total : 0;
   const tone = budgetTone(ratio);
+  const chart = useChartTheme();
   const over = rows.filter((r) => r.spent > r.amount).length;
-  const ring = [{ value: Math.min(ratio * 100, 100), fill: ratio >= 1 ? '#C2603F' : ratio >= 0.75 ? '#D97706' : '#6F7F55' }];
+  const ring = [{ value: Math.min(ratio * 100, 100), fill: ratio >= 1 ? chart.expense : ratio >= 0.75 ? chart.warning : chart.income }];
 
   return (
     <div className="flex flex-col gap-5">
@@ -124,12 +126,12 @@ export default function Budgets() {
             <ResponsiveContainer>
               <RadialBarChart innerRadius="78%" outerRadius="100%" data={ring} startAngle={90} endAngle={-270}>
                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                <RadialBar dataKey="value" cornerRadius={20} background={{ fill: 'rgba(143,138,132,0.14)' }} animationDuration={900} />
+                <RadialBar dataKey="value" cornerRadius={20} background={{ fill: chart.track }} animationDuration={900} />
               </RadialBarChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className={`serif text-5xl ${tone.text}`}>{Math.round(ratio * 100)}%</span>
-              <span className="text-xs text-ink-400">du budget utilisé</span>
+              <span className="text-xs text-fg-muted">du budget utilisé</span>
             </div>
           </div>
           <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
@@ -143,11 +145,11 @@ export default function Budgets() {
             </div>
             <div>
               <dt className="label">Reste</dt>
-              <dd className={`num mt-1 font-semibold ${total - spent < 0 ? 'text-expense' : ''}`}><Amount value={total - spent} /></dd>
+              <dd className={`num mt-1 font-semibold ${total - spent < 0 ? 'text-error' : ''}`}><Amount value={total - spent} /></dd>
             </div>
             <div>
               <dt className="label">Dépassés</dt>
-              <dd className={`mt-1 font-semibold ${over ? 'text-expense' : 'text-income'}`}>{over} / {rows.length}</dd>
+              <dd className={`mt-1 font-semibold ${over ? 'text-error' : 'text-success'}`}>{over} / {rows.length}</dd>
             </div>
           </dl>
         </Card>
@@ -159,7 +161,7 @@ export default function Budgets() {
                 <BudgetBar key={r.id} category={categoryById(r.categoryId, 'expense')} spent={r.spent} amount={r.amount} onClick={() => setEditing(r)} />
               ))
             ) : (
-              <p className="py-12 text-center text-sm text-ink-400">Aucun budget. Créez-en un pour suivre vos dépenses.</p>
+              <p className="py-12 text-center text-sm text-fg-muted">Aucun budget. Créez-en un pour suivre vos dépenses.</p>
             )}
           </div>
         </Card>

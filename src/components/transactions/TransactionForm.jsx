@@ -106,7 +106,7 @@ export default function TransactionForm({ open, onClose, initial }) {
     }
   }
 
-  const accent = form.type === 'income' ? 'text-income' : form.type === 'expense' ? 'text-expense' : 'text-ink-500';
+  const accent = form.type === 'income' ? 'text-success' : form.type === 'expense' ? 'text-error' : 'text-fg-muted';
 
   return (
     <Modal open={open} onClose={onClose} title={initial ? "Modifier l'opération" : 'Nouvelle opération'}>
@@ -114,7 +114,7 @@ export default function TransactionForm({ open, onClose, initial }) {
         {/* Validation en haut de la fenêtre de saisie */}
         <div className="flex gap-2">
           {initial && (
-            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-expense" aria-label="Supprimer">
+            <button type="button" onClick={del} disabled={saving} className="btn-ghost !text-error" aria-label="Supprimer">
               <Trash2 size={16} />
             </button>
           )}
@@ -123,7 +123,7 @@ export default function TransactionForm({ open, onClose, initial }) {
           </button>
         </div>
 
-        {err && <p className="text-sm text-expense">{err}</p>}
+        {err && <p className="text-sm text-error">{err}</p>}
 
         <div className="flex justify-center">
           <Segmented options={TYPES} value={form.type} onChange={(v) => setForm((f) => ({ ...f, type: v, categoryId: '' }))} />
@@ -136,9 +136,9 @@ export default function TransactionForm({ open, onClose, initial }) {
             placeholder="0"
             value={form.amount}
             onChange={set('amount')}
-            className={`serif w-full bg-transparent text-center text-6xl outline-none placeholder:text-ink-300 dark:placeholder:text-ink-600 ${accent}`}
+            className={`serif w-full bg-transparent text-center text-6xl outline-none placeholder:text-fg-muted ${accent}`}
           />
-          <span className="text-lg font-medium text-ink-400">{getConfig().currency}</span>
+          <span className="text-lg font-medium text-fg-muted">{getConfig().currency}</span>
         </div>
 
         {form.type !== 'transfer' ? (
@@ -153,10 +153,10 @@ export default function TransactionForm({ open, onClose, initial }) {
                     key={c.id}
                     onClick={() => setForm((f) => ({ ...f, categoryId: c.id }))}
                     className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] transition ${
-                      active ? 'bg-white shadow-soft ring-1 ring-accent/50 dark:bg-white/[0.06]' : 'hover:bg-sand/40 dark:hover:bg-white/[0.03]'
+                      active ? 'bg-fg/10 ring-2 ring-accent' : 'hover:bg-fg/10'
                     }`}
                   >
-                    <CategoryIcon icon={c.icon} color={c.color} size={38} />
+                    <CategoryIcon icon={c.icon} size={38} />
                     <span className="w-full hyphens-auto break-words text-center">{c.name}</span>
                   </button>
                 );
@@ -165,9 +165,9 @@ export default function TransactionForm({ open, onClose, initial }) {
                 <button
                   type="button"
                   onClick={() => setNewCat('')}
-                  className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] text-ink-500 transition hover:bg-sand/40 dark:text-ink-400 dark:hover:bg-white/[0.03]"
+                  className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight tracking-[-0.035em] text-fg-muted transition hover:bg-fg/10"
                 >
-                  <span className="inline-flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-dashed border-ink-300 dark:border-ink-600">
+                  <span className="inline-flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-dashed border-fg-muted">
                     <Plus size={16} />
                   </span>
                   <span className="w-full text-center">Nouvelle</span>

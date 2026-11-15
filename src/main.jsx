@@ -3,11 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { FinanceProvider } from './context/FinanceContext';
 import './index.css';
-// Surcouche optionnelle (inactive tant que <html> n'a pas la classe « theme-hologram »)
-import './hologram/useHologram';
-import './hologram/hologram.css';
-import './hologram/water-button.js';
-import './hologram/app-background.css';
+// Thème 60/30/10 : appliqué dès l'import, avant le premier rendu
+import './theme/useAppTheme';
+import './theme/origin.css';
+import './components/fx/water-button.js';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

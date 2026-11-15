@@ -1,25 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useAppTheme } from '../theme/useAppTheme';
+import { mix } from '../theme/themes';
 
-/** Couleurs des axes/grilles des graphiques selon le thème courant (palette chaude). */
+/**
+ * Couleurs des graphiques, dérivées des tokens du thème courant.
+ * Les graphiques sont posés sur des cartes (couleur « second ») : variantes lisibles sur cette surface.
+ */
 export function useChartTheme() {
-  const get = () => document.documentElement.classList.contains('dark');
-  const [dark, setDark] = useState(get);
-  useEffect(() => {
-    const obs = new MutationObserver(() => setDark(get()));
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
+  const { theme: t } = useAppTheme();
+  const s = t.onSecond;
   return {
-    dark,
-    axis: dark ? '#8F8A84' : '#8F8A84',
-    grid: dark ? 'rgba(251,249,245,0.05)' : 'rgba(25,25,25,0.05)',
-    cursor: dark ? 'rgba(251,249,245,0.18)' : 'rgba(25,25,25,0.14)',
-    surface: dark ? '#221F1B' : '#FBF9F5',
-    accent: '#CC5A37',
-    accentSoft: '#DA7756',
-    income: '#6F7F55',
-    incomeSoft: '#9AA77F',
-    expense: '#C2603F',
-    expenseSoft: '#DA8A6C',
+    dark: t.dark,
+    surface: t.second,
+    ink: t.textOnSecond,
+    axis: s.muted,
+    grid: mix(t.second, t.textOnSecond, 0.14),
+    cursor: mix(t.second, t.textOnSecond, 0.3),
+    track: mix(t.second, t.textOnSecond, 0.12),
+    accent: s.accentGfx,
+    accentSoft: mix(s.accentGfx, t.second, 0.3),
+    income: s.successGfx,
+    incomeSoft: mix(s.successGfx, t.second, 0.35),
+    expense: s.errorGfx,
+    expenseSoft: mix(s.errorGfx, t.second, 0.35),
+    warning: s.warningGfx,
+    ramp: t.ramp,
+    other: t.other,
   };
 }

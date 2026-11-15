@@ -5,7 +5,7 @@ import { shiftMonth } from '../utils/stats';
 export default function MonthPicker({ value, onChange }) {
   const isCurrent = value >= monthKey(todayISO());
   return (
-    <div className="inline-flex items-center gap-1 rounded-full border border-sand-line bg-white/60 p-1 shadow-soft backdrop-blur-md dark:border-night-line dark:bg-white/[0.03] dark:shadow-none">
+    <div className="inline-flex items-center gap-1 rounded-full surface-second border border-line p-1 shadow-soft">
       <button onClick={() => onChange(shiftMonth(value, -1))} className="btn-ghost h-8 w-8 !p-0" aria-label="Mois précédent">
         <ChevronLeft size={16} />
       </button>

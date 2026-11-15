@@ -1,7 +1,6 @@
 /*
  * Bulle d'eau de la barre de navigation mobile.
- * Couleurs : uniquement les variables issues de tailwind.config.js (voir palette.js),
- * en version translucide. Aucune couleur codée en dur.
+ * Élément actif de la navigation : couleur d'accent (10 %), tokens du thème uniquement.
  */
 
 /* Onglets au-dessus de la bulle + zone tactile ≥ 44 px */
@@ -40,11 +39,10 @@
   height: 100%;
   overflow: hidden;
   border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
-  background: rgb(var(--mb-accent) / 0.17);
-  border: 1px solid rgb(var(--mb-accent) / 0.45);
+  background: rgb(var(--accent));
   box-shadow:
-    inset 0 2px 3px rgb(var(--mb-ink) / 0.45),
-    inset 0 -4px 7px rgb(var(--mb-accent) / 0.3);
+    inset 0 2px 3px rgb(var(--accent-hi) / 0.6),
+    0 6px 16px -8px rgb(var(--accent) / 0.8);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   will-change: transform;
@@ -61,7 +59,7 @@
   width: 36%;
   height: 18%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgb(var(--mb-ink) / 0.55), rgb(var(--mb-ink) / 0) 70%);
+  background: radial-gradient(ellipse at center, rgb(var(--accent-hi) / 0.7), rgb(var(--accent-hi) / 0) 70%);
   will-change: transform;
 }
 
@@ -89,7 +87,7 @@
 }
 
 /* Appareil lent : pas de flou ni de morphing de contour */
-.holo-lite .nav-bubble__body {
+.fx-lite .nav-bubble__body {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   animation: nav-bubble-breathe 3s ease-in-out infinite;

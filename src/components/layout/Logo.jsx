@@ -6,10 +6,10 @@ export function LogoMark({ size = 40 }) {
       <img
         src="/avatar-bw.png"
         alt="mABOUrse"
-        className="h-full w-full rounded-full object-cover grayscale ring-1 ring-sand-line dark:ring-night-line"
+        className="h-full w-full rounded-full object-cover grayscale ring-1 ring-line"
       />
       <span
-        className="absolute -bottom-0.5 -right-1 flex items-center justify-center rounded-full bg-accent font-serif font-medium text-white ring-2 ring-cream dark:ring-night"
+        className="absolute -bottom-0.5 -right-1 flex items-center justify-center rounded-full bg-accent font-serif font-medium text-on-accent ring-2 ring-surface"
         style={{ width: badge, height: badge, fontSize: badge * 0.66 }}
       >
         $

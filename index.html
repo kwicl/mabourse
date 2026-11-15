@@ -11,8 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#FBF9F5" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1A1714" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="" />
     <title>mABOUrse</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,12 +20,11 @@
       rel="stylesheet"
     />
     <script>
-      // Applique le thème avant le rendu pour éviter le flash
+      // Fond du thème mémorisé, appliqué avant le chargement de l'app (évite un flash au lancement)
       (function () {
         try {
-          var t = localStorage.getItem('mabourse-theme');
-          var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (dark) document.documentElement.classList.add('dark');
+          var bg = localStorage.getItem('mabourse-theme-bg');
+          if (bg) document.documentElement.style.background = bg;
         } catch (e) {}
       })();
     </script>

@@ -16,13 +16,14 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
   const t = useChartTheme();
   const [active, setActive] = useState(null);
 
-  const top = data.slice(0, limit);
+  // Couleurs par rang, issues du thème (accent en tête)
+  const top = data.slice(0, limit).map((d, i) => ({ ...d, color: t.ramp[i % t.ramp.length] }));
   const rest = data.slice(limit).reduce((s, d) => s + d.value, 0);
   const total = data.reduce((s, d) => s + d.value, 0);
-  const slices = rest > 0 ? [...top, { id: 'other', name: 'Autres', value: rest, color: t.dark ? '#4A4744' : '#E6E0D4', icon: 'Circle', share: rest / total }] : top;
+  const slices = rest > 0 ? [...top, { id: 'other', name: 'Autres', value: rest, color: t.other, icon: 'Circle', share: rest / total }] : top;
   const focus = active != null ? slices[active] : null;
 
-  if (!total) return <p className="py-16 text-center text-sm text-ink-400">Aucune dépense ce mois-ci.</p>;
+  if (!total) return <p className="py-16 text-center text-sm text-fg-muted">Aucune dépense ce mois-ci.</p>;
 
   return (
     <div className={showLegend ? 'grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]' : ''}>
@@ -53,7 +54,7 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
           <span className="label">{focus ? focus.name : 'Total'}</span>
           <span className="serif mt-1 max-w-[62%] text-lg leading-tight sm:text-xl"><Amount value={focus ? focus.value : total} /></span>
-          {focus && <span className="text-xs text-ink-500">{Math.round(focus.share * 100)} %</span>}
+          {focus && <span className="text-xs text-fg-muted">{Math.round(focus.share * 100)} %</span>}
         </div>
       </div>
 
@@ -64,12 +65,12 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
               key={s.id}
               onMouseEnter={() => setActive(i)}
               onMouseLeave={() => setActive(null)}
-              className={`flex items-center gap-3 rounded-xl px-2 py-1.5 transition-all duration-300 ease-out ${active === i ? 'bg-sand/50 dark:bg-white/[0.04]' : ''}`}
+              className={`flex items-center gap-3 rounded-xl px-2 py-1.5 transition-all duration-300 ease-out ${active === i ? 'bg-fg/10' : ''}`}
             >
               <CategoryIcon icon={s.icon} color={s.color} size={32} />
               <span className="min-w-0 flex-1 truncate text-sm">{s.name}</span>
               <span className="num text-sm font-medium"><Amount value={s.value} /></span>
-              <span className="w-10 text-right text-xs text-ink-400">{Math.round(s.share * 100)}%</span>
+              <span className="w-10 text-right text-xs text-fg-muted">{Math.round(s.share * 100)}%</span>
             </li>
           ))}
         </ul>
