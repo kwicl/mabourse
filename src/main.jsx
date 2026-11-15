@@ -19,6 +19,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 // Fonctionnement hors-ligne : met l'app en cache pour qu'elle s'ouvre sans connexion
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    // Nouvelle version déployée : le nouveau service worker prend la main, on recharge une fois
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) window.location.reload();
+    });
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {});
   });
 }
