@@ -1,6 +1,7 @@
 import { Check, LayoutGrid } from 'lucide-react';
 import Card from './ui/Card';
-import { ORIGIN, PICKER_THEMES, isOrigin } from '../theme/themes';
+import { LIQUID, ORIGIN, PICKER_THEMES, isOrigin } from '../theme/themes';
+import BackgroundPicker from './BackgroundPicker';
 import OriginModeToggle from './OriginModeToggle';
 import { useAppTheme } from '../theme/useAppTheme';
 import { navigate } from '../hooks/useHashRoute';
@@ -34,7 +35,7 @@ export default function ThemePicker() {
   return (
     <Card
       title="Thème"
-      subtitle="Design d'origine (jour / nuit) ou un des 6 thèmes 60 / 30 / 10. Le choix est mémorisé sur cet appareil."
+      subtitle="Liquid Glass, design d'origine (jour / nuit) ou un thème 60 / 30 / 10. Le choix est mémorisé sur cet appareil."
       action={
         <button onClick={() => navigate('themes')} className="btn-ghost shrink-0 !px-3 text-xs">
           <LayoutGrid size={14} /> Comparer
@@ -72,6 +73,7 @@ export default function ThemePicker() {
         })}
       </div>
       <OriginModeToggle variant="row" className="mt-3 !justify-between" />
+      {theme.id === LIQUID && <BackgroundPicker className="mt-5" />}
     </Card>
   );
 }

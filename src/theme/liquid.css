@@ -1,0 +1,253 @@
+/*
+ * Thème « Liquid Glass » : surfaces en verre liquide posées sur une photo crépusculaire.
+ * Matériau : voile clair très léger + flou + saturation, réfraction SVG (#lg-refract) sur
+ * Chromium (classe .lg-refract posée par liquid-glass.js), liseré spéculaire, reflet qui suit
+ * le pointeur (--lg-x / --lg-y). Toute surface : .glass, .nav-bar, [role="dialog"], [glass].
+ * Couleurs : tokens du thème (--on-main, --accent…) ; le blanc / noir du verre sont des lumières.
+ */
+[data-theme='liquid'] {
+  --lg-image: url('/bg-parthenon.jpg');
+  --lg-tint: 255 255 255;
+  --lg-blur: 18px;
+  --lg-filter: blur(var(--lg-blur)) saturate(185%) brightness(1.06);
+}
+html.lg-refract[data-theme='liquid'] {
+  --lg-filter: url(#lg-refract) blur(calc(var(--lg-blur) * 0.6)) saturate(190%) brightness(1.08);
+}
+
+/* ---------- Fond (le « backdrop ») ---------- */
+html[data-theme='liquid'] body {
+  background-color: transparent;
+}
+html[data-theme='liquid'] body::before,
+html[data-theme='liquid'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+/*
+ * Photo choisie (--lg-image, posée par liquid-glass.js) affichée telle quelle : aucun voile ni
+ * filtre de couleur. Les photos sont en portrait (≈ 736 px de large) :
+ *  - écran portrait (téléphone) : plein écran (cover), léger agrandissement seulement ;
+ *  - écran paysage : photo nette à la hauteur de l'écran (jamais agrandie au-delà de sa taille
+ *    réelle), sur un fond fait de la même photo agrandie et floutée (::before).
+ */
+html[data-theme='liquid'] body::before {
+  z-index: -2;
+  background: #000 var(--lg-image) center / cover no-repeat;
+}
+html[data-theme='liquid'] body::after {
+  z-index: -1;
+  background: var(--lg-image) center / cover no-repeat;
+}
+@media (min-aspect-ratio: 1/1) {
+  html[data-theme='liquid'] body::before {
+    inset: -60px;
+    filter: blur(40px);
+    transform: scale(1.05);
+  }
+  html[data-theme='liquid'] body::after {
+    background-size: auto min(100vh, 1472px);
+    background-position: center;
+    /* fondu sur les bords pour se marier au fond flouté */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 1024px) {
+  /* à côté de la barre latérale : photo centrée dans la zone de contenu */
+  html[data-theme='liquid'] body::after {
+    left: 264px;
+  }
+}
+
+/* Texte posé directement sur la photo (en-tête de page) : ombre douce pour rester lisible */
+[data-theme='liquid'] main > header {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 2px 18px rgb(0 0 0 / 0.55);
+}
+/* Photo claire : verre plus dense pour garder le texte clair lisible */
+html.lg-light[data-theme='liquid'] {
+  --lg-base: 0.62;
+  --lg-filter: blur(var(--lg-blur)) saturate(140%) brightness(0.62);
+}
+html.lg-light.lg-refract[data-theme='liquid'] {
+  --lg-filter: url(#lg-refract) blur(calc(var(--lg-blur) * 0.6)) saturate(140%) brightness(0.62);
+}
+html.lg-light[data-theme='liquid'] :is(.glass, .nav-bar, [role='dialog'], [glass]),
+html.lg-light[data-theme='liquid'] .surface-second {
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(140%) brightness(0.62);
+}
+
+/* ---------- Matériau verre ---------- */
+[data-theme='liquid'] :is(.glass, .nav-bar, [role='dialog'], [glass]),
+[data-theme='liquid'] .surface-second {
+  --surface: var(--second);
+  --fg: var(--on-second);
+  isolation: isolate;
+  color: rgb(var(--fg));
+  background:
+    linear-gradient(145deg, rgb(var(--lg-tint) / 0.16) 0%, rgb(var(--lg-tint) / 0.05) 45%, rgb(var(--lg-tint) / 0.09) 100%),
+    rgb(var(--main) / var(--lg-base, 0.4));
+  border: 1px solid rgb(var(--lg-tint) / 0.16);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--lg-tint) / 0.45),
+    inset 0 -1px 0 rgb(var(--lg-tint) / 0.1),
+    inset 0 0 24px rgb(var(--lg-tint) / 0.06),
+    0 24px 48px -24px rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(185%) brightness(1.06);
+  backdrop-filter: var(--lg-filter);
+}
+/* Cartes / panneaux positionnés pour accueillir le liseré et le reflet */
+[data-theme='liquid'] :is(.glass, [role='dialog'], [glass]):not(.fixed):not(.absolute):not(.sticky) {
+  position: relative;
+}
+
+/* Liseré spéculaire : arête claire en haut à gauche, plus discrète en bas à droite */
+[data-theme='liquid'] :is(.glass, .nav-bar, [role='dialog'], [glass])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--lg-tint) / 0.7) 0%,
+    rgb(var(--lg-tint) / 0.08) 35%,
+    rgb(var(--lg-tint) / 0.04) 65%,
+    rgb(var(--lg-tint) / 0.35) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+/* Reflet qui suit le pointeur */
+[data-theme='liquid'] :is(.glass, .nav-bar, [role='dialog'], [glass])::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--lg-x, 20%) var(--lg-y, 0%),
+    rgb(var(--lg-tint) / 0.14),
+    transparent 60%
+  );
+  opacity: var(--lg-on, 0.6);
+  transition: opacity 0.4s ease-out;
+}
+
+/* Survol : la lame se soulève */
+[data-theme='liquid'] .glass-hover:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(var(--lg-tint) / 0.55),
+    inset 0 -1px 0 rgb(var(--lg-tint) / 0.12),
+    inset 0 0 28px rgb(var(--lg-tint) / 0.08),
+    0 30px 60px -24px rgb(0 0 0 / 0.7);
+}
+
+/* Navigation : plus épaisse, plus floue */
+[data-theme='liquid'] .nav-bar {
+  --lg-blur: 26px;
+}
+[data-theme='liquid'] aside.nav-bar {
+  border-width: 0 1px 0 0;
+  border-radius: 0;
+}
+[data-theme='liquid'] aside nav button[aria-current='page'] {
+  background: rgb(var(--lg-tint) / 0.14);
+  color: rgb(var(--fg));
+  box-shadow:
+    inset 0 1px 0 rgb(var(--lg-tint) / 0.4),
+    0 6px 16px -8px rgb(0 0 0 / 0.5);
+}
+[data-theme='liquid'] aside nav button[aria-current='page'] svg,
+[data-theme='liquid'] .nav-bubble-host > button[aria-current='page'] {
+  color: rgb(var(--accent-ink));
+}
+
+/* Bulle de navigation : goutte de verre */
+[data-theme='liquid'] .nav-bubble__body {
+  background: rgb(var(--lg-tint) / 0.14);
+  border: 1px solid rgb(var(--lg-tint) / 0.3);
+  box-shadow:
+    inset 0 2px 3px rgb(var(--lg-tint) / 0.45),
+    inset 0 -4px 8px rgb(var(--accent) / 0.25);
+}
+[data-theme='liquid'] .nav-bubble__shine {
+  background: radial-gradient(ellipse at center, rgb(var(--lg-tint) / 0.6), rgb(var(--lg-tint) / 0) 70%);
+}
+
+/* Fenêtre modale : voile léger, la lame de verre fait le travail */
+[data-theme='liquid'] [role='dialog'] {
+  --lg-blur: 30px;
+  background:
+    linear-gradient(145deg, rgb(var(--lg-tint) / 0.16) 0%, rgb(var(--lg-tint) / 0.05) 45%, rgb(var(--lg-tint) / 0.09) 100%),
+    rgb(var(--main) / calc(var(--lg-base, 0.4) + 0.2));
+}
+[data-theme='liquid'] .bg-main\/70 {
+  background-color: rgb(var(--main) / 0.35);
+}
+
+/* Champs : verre creusé */
+[data-theme='liquid'] .input {
+  background: rgb(0 0 0 / 0.22);
+  border-color: rgb(var(--lg-tint) / 0.14);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35), inset 0 -1px 0 rgb(var(--lg-tint) / 0.08);
+}
+[data-theme='liquid'] .input:focus {
+  border-color: rgb(var(--accent) / 0.8);
+}
+[data-theme='liquid'] select.input option {
+  background: rgb(var(--second));
+}
+
+/* Contrôle segmenté : rail de verre, pastille active en goutte */
+[data-theme='liquid'] .border-line.bg-fg\/5 {
+  background: rgb(var(--main) / calc(var(--lg-base, 0.4) + 0.1));
+  border-color: rgb(var(--lg-tint) / 0.16);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.3), inset 0 -1px 0 rgb(var(--lg-tint) / 0.1);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+html.lg-light[data-theme='liquid'] .border-line.bg-fg\/5 {
+  background: rgb(var(--main) / 0.78);
+}
+
+/* Boutons secondaires et pastilles : verre fin */
+[data-theme='liquid'] .chip {
+  background: rgb(var(--lg-tint) / 0.12);
+  box-shadow: inset 0 1px 0 rgb(var(--lg-tint) / 0.25);
+}
+[data-theme='liquid'] .btn-ghost:hover {
+  background: rgb(var(--lg-tint) / 0.12);
+}
+
+/* Boutons « bulle d'eau » : verre teinté de l'accent, texte clair */
+[data-theme='liquid'] .water-glow {
+  color: rgb(var(--fg));
+}
+[data-theme='liquid'] .water-glow::before {
+  background:
+    radial-gradient(130% 100% at 30% 10%, rgb(var(--lg-tint) / 0.3), rgb(var(--accent) / 0.32) 55%, rgb(var(--accent) / 0.5));
+  border: 1px solid rgb(var(--lg-tint) / 0.4);
+  box-shadow:
+    inset 0 2px 3px rgb(var(--lg-tint) / 0.6),
+    inset 0 -6px 12px rgb(var(--accent) / 0.45),
+    0 10px 24px -10px rgb(var(--accent) / 0.8);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
+}
+[data-theme='liquid'] .water-glow::after {
+  background: radial-gradient(ellipse at center, rgb(var(--lg-tint) / 0.85), rgb(var(--lg-tint) / 0) 70%);
+}
+[data-theme='liquid'] .btn-primary {
+  color: rgb(var(--on-accent));
+  box-shadow: inset 0 1px 0 rgb(var(--lg-tint) / 0.5), 0 8px 20px -10px rgb(var(--accent) / 0.8);
+}
+

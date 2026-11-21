@@ -23,8 +23,13 @@ const ORIGIN_PT = { slate: '#1E262D', sunset: '#D67634', marble: '#EEE5D6' };
 
 export const ORIGIN = 'origine';
 export const ORIGIN_NIGHT = 'origine-nuit';
+export const LIQUID = 'liquid';
+
+/** Liquid Glass : verre réfractif sur fond photo crépusculaire (voir liquid.css / liquid-glass.js). */
+const LIQUID_RAMP = ['#FF8F5E', '#7CB8FF', '#C79BFF', '#5EE0C0', '#FFD166', '#FF6B9A', '#9AA7FF', '#8BE08A', '#F2A65A'];
 
 export const THEMES = [
+  { id: LIQUID, label: 'Liquid Glass', desc: 'Verre liquide, réfraction', mode: 'dark', main: '#0B1022', second: '#1A2140', accent: '#FF8F5E', textOnMain: '#F4F6FF', textOnSecond: '#F4F6FF', textOnAccent: '#1A1020', ramp: LIQUID_RAMP, other: '#8A93B0' },
   { id: ORIGIN, label: "Design d'origine", desc: 'Parthénon, terre cuite', mode: 'light', main: '#FBF9F5', second: '#FFFFFF', accent: '#CC5A37', textOnMain: '#191919', textOnSecond: '#191919', textOnAccent: '#FFFFFF', status: ORIGIN_STATUS, ramp: ORIGIN_RAMP, other: '#8C857A', pt: ORIGIN_PT },
   { id: ORIGIN_NIGHT, label: "Design d'origine", desc: 'Parthénon, terre cuite', mode: 'dark', hidden: true, main: '#1A1714', second: '#221F1B', accent: '#DA7756', textOnMain: '#F3EFE7', textOnSecond: '#F3EFE7', textOnAccent: '#191919', status: ORIGIN_STATUS, ramp: ORIGIN_RAMP, other: '#8C857A', pt: ORIGIN_PT },
   { id: 'acier', label: 'Acier & Jaune', mode: 'dark', main: '#111111', second: '#8A939B', accent: '#FFC300', textOnMain: '#FFFFFF', textOnSecond: '#111111', textOnAccent: '#111111' },
@@ -35,7 +40,7 @@ export const THEMES = [
   { id: 'blush', label: 'Blush & Menthe', mode: 'light', main: '#F5D9D9', second: '#2B2E35', accent: '#22E3A2', textOnMain: '#2B2E35', textOnSecond: '#FFFFFF', textOnAccent: '#0F2E24' },
 ];
 
-export const DEFAULT_THEME = ORIGIN;
+export const DEFAULT_THEME = LIQUID;
 
 /** Thèmes proposés dans le sélecteur (la variante nuit du design d'origine passe par sa bascule jour / nuit). */
 export const PICKER_THEMES = THEMES.filter((t) => !t.hidden);

@@ -3,12 +3,13 @@
  * changé instantanément sans rechargement via l'attribut `data-theme` de <html>.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { ORIGIN, ORIGIN_NIGHT, TOKENS, isOrigin, themeById, themesCss } from './themes';
+import { LIQUID, ORIGIN, ORIGIN_NIGHT, TOKENS, isOrigin, themeById, themesCss } from './themes';
 
 const KEY = 'mabourse-theme';
 const BG = 'mabourse-theme-bg'; // couleur de fond, relue par index.html pour éviter un flash au lancement
 const EVENT = 'mabourse-theme';
 const ORIGIN_MODE = 'mabourse-origin-mode'; // jour / nuit du design d'origine
+const LIQUID_ONCE = 'mabourse-liquid-v1'; // passage unique au thème Liquid Glass
 const root = document.documentElement;
 
 // Feuille des tokens de tous les thèmes (aussi utilisée par les aperçus côte à côte)
@@ -19,6 +20,12 @@ document.head.appendChild(style);
 
 function stored() {
   try {
+    // Nouveau design : Liquid Glass appliqué une fois, l'utilisateur peut ensuite rechoisir
+    if (!localStorage.getItem(LIQUID_ONCE)) {
+      localStorage.setItem(LIQUID_ONCE, '1');
+      localStorage.setItem(KEY, LIQUID);
+      return LIQUID;
+    }
     const v = localStorage.getItem(KEY);
     if (TOKENS[v]) return v;
     // Ancien réglage jour / nuit du design d'origine
@@ -27,7 +34,7 @@ function stored() {
   } catch {
     /* ignore */
   }
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? ORIGIN_NIGHT : ORIGIN;
+  return LIQUID;
 }
 
 function apply(id) {
