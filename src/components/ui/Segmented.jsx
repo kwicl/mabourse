@@ -24,7 +24,7 @@ export default function Segmented({ options, value, onChange, size = 'md' }) {
       {pill && (
         <span
           aria-hidden="true"
-          className="absolute bottom-1 left-0 top-1 rounded-full bg-accent shadow-soft transition-[transform,width] duration-500 ease-[cubic-bezier(0.22,0.9,0.24,1)] motion-reduce:transition-none"
+          className="absolute bottom-1 left-0 top-1 rounded-full bg-accent shadow-soft transition-[transform,width] duration-500 ease-[cubic-bezier(0.22,0.9,0.24,1)]"
           style={{ width: pill.w, transform: `translateX(${pill.x}px)` }}
         />
       )}

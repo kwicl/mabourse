@@ -4,7 +4,6 @@ import { cashPending } from '../../utils/cashRegister';
 
 const DURATION = 1100;
 const TWEEN = 550;
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
  * Montant avec devise plus petite et grise (« 327 773,0 MAD »).
@@ -12,6 +11,7 @@ const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)'
  * `animate` : le chiffre glisse vers sa nouvelle valeur.
  *   - juste après un enregistrement : il défile comme une caisse (paliers + montant ajouté qui s'envole) ;
  *   - sinon (changement de période…) : il compte en douceur depuis la valeur affichée.
+ *   Joué même si le téléphone demande de réduire les animations (souvent activé par l'économie d'énergie).
  */
 export default function Amount({ value, sign = '', hidden = false, className = '', animate = false }) {
   const [shown, setShown] = useState(value);
@@ -28,7 +28,7 @@ export default function Amount({ value, sign = '', hidden = false, className = '
       setShown(value);
       setCash(false);
     };
-    if (!animate || from === value || hidden || !Number.isFinite(from) || !Number.isFinite(value) || reducedMotion()) {
+    if (!animate || from === value || hidden || !Number.isFinite(from) || !Number.isFinite(value)) {
       settle();
       return undefined;
     }

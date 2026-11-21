@@ -295,13 +295,3 @@
 .tl-swap {
   animation: tl-swap 0.35s ease-out both;
 }
-@media (prefers-reduced-motion: reduce) {
-  .tl-glide,
-  .tl-grip,
-  .tl-bubble {
-    transition: none;
-  }
-  .tl-swap {
-    animation: none;
-  }
-}
