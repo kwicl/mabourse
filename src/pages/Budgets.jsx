@@ -67,7 +67,7 @@ function BudgetForm({ open, onClose, initial }) {
                   categoryId === c.id ? 'bg-fg/10 ring-2 ring-accent' : 'hover:bg-fg/10'
                 }`}
               >
-                <CategoryIcon icon={c.icon} size={38} />
+                <CategoryIcon icon={c.icon} color={c.color} size={38} />
                 <span className="w-full truncate text-center">{c.name}</span>
               </button>
             ))}

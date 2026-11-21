@@ -19,7 +19,7 @@ export default function BudgetBar({ category, spent, amount, compact = false, on
       className="w-full rounded-xl p-2.5 text-left transition-all duration-300 ease-out hover:bg-fg/10"
     >
       <div className="flex items-center gap-3.5">
-        <CategoryIcon icon={category?.icon} size={compact ? 32 : 40} />
+        <CategoryIcon icon={category?.icon} color={category?.color} size={compact ? 32 : 40} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
             <span className="truncate text-[14px] font-medium">{category?.name ?? '—'}</span>

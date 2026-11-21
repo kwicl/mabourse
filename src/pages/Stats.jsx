@@ -146,7 +146,7 @@ export default function Stats() {
                   <tr key={c.id} className="border-t border-line transition-colors duration-300 hover:bg-fg/10">
                     <td className="py-2.5">
                       <span className="flex items-center gap-3">
-                        <CategoryIcon icon={c.icon} size={30} />
+                        <CategoryIcon icon={c.icon} color={c.color} size={30} />
                         {c.name}
                       </span>
                     </td>

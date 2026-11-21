@@ -15,7 +15,7 @@ import { accountBalances, byCategory, byCategoryRange, seriesBetween, totalBalan
 import { monthKey, pct, signedMoney, todayISO } from '../utils/format';
 import { PERIODS, periodRange, rangeLabel } from '../utils/periods';
 import Amount from '../components/ui/Amount';
-import { paletteByRank } from '../utils/categoryPalette';
+import PeriodTimeline from '../components/PeriodTimeline';
 
 const change = (cur, prev) => (prev ? (cur - prev) / Math.abs(prev) : NaN);
 
@@ -78,7 +78,7 @@ function SeriesToggle({ visible, onToggle, totals, masked = [], series = SERIES 
               style={{ background: colors[key], opacity: on ? 1 : 0.35 }}
             />
             {label}
-            <span className={`serif text-[14px] ${on ? '' : 'opacity-60'}`}><Amount value={totals[key]} hidden={masked.includes(key)} /></span>
+            <span className={`serif text-[14px] ${on ? '' : 'opacity-60'}`}><Amount value={totals[key]} hidden={masked.includes(key)} animate /></span>
           </button>
         );
       })}
@@ -98,6 +98,13 @@ export default function Dashboard({ onEdit }) {
   const chooseDate = (field, value) => {
     if (!value) return;
     const next = { from: r.from, to: r.to, [field]: value };
+    setCustom(next);
+    store(CUSTOM_KEY, JSON.stringify(next));
+    choosePeriod('custom');
+  };
+  // Frise : une plage tirée à la main devient la période personnalisée
+  const chooseRange = (from, to) => {
+    const next = { from, to };
     setCustom(next);
     store(CUSTOM_KEY, JSON.stringify(next));
     choosePeriod('custom');
@@ -137,7 +144,7 @@ export default function Dashboard({ onEdit }) {
   const r = useMemo(() => periodRange(periodKey, transactions, custom), [periodKey, transactions, custom]);
   const base = PERIODS.find((p) => p.key === periodKey);
   const period = periodKey === 'custom' ? { ...base, label: rangeLabel(r.from, r.to) } : base;
-  const chart = useChartTheme();
+  const days = Math.round((new Date(`${r.to}T12:00:00`) - new Date(`${r.from}T12:00:00`)) / 86400000) + 1;
   const s = useMemo(() => {
     const cur = totalsBetween(transactions, r.from, r.to);
     const prev = r.prevFrom ? totalsBetween(transactions, r.prevFrom, r.prevTo) : null;
@@ -152,13 +159,13 @@ export default function Dashboard({ onEdit }) {
       delta: cur.net,
       totals: { balance: endBalance, income: cur.income, expense: cur.expense },
       daily: series.map((d) => ({ date: d.date, expense: d.dayExpense })),
-      // Couleurs du thème attribuées par rang de dépense
-      rangeCats: paletteByRank(byCategoryRange(transactions, categories, r.from, r.to), chart.ramp, chart.other),
+      // Couleur propre à chaque catégorie (src/utils/categoryVisual.js)
+      rangeCats: byCategoryRange(transactions, categories, r.from, r.to),
       cats: byCategory(transactions, categories, m),
       accs: accountBalances(accounts, transactions),
       recent: [...transactions].sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 6),
     };
-  }, [transactions, categories, accounts, m, r, chart.ramp, chart.other]);
+  }, [transactions, categories, accounts, m, r]);
   // Un seul jour : les courbes couvrent les 7 derniers jours
   const chartLabel = r.chartFrom ? '7 derniers jours' : period.label;
   const trend = (k) => (s.prev ? change(s.cur[k], s.prev[k]) : NaN);
@@ -171,8 +178,9 @@ export default function Dashboard({ onEdit }) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Sélecteur de période global : préréglages + plage Du / Au */}
-      <div className="-mb-1 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      {/* Sélecteur de période global : préréglages + plage Du / Au + frise */}
+      <section className="glass animate-fade-up p-4 sm:p-5" aria-label="Période">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
           <Segmented value={periodKey} onChange={choosePeriod} options={PRESETS} />
         </div>
@@ -207,6 +215,16 @@ export default function Dashboard({ onEdit }) {
           </label>
         </div>
       </div>
+
+        <p key={`${r.from}-${r.to}`} className="tl-swap mt-4 text-sm text-fg-muted" aria-live="polite">
+          <strong className="font-semibold text-fg">{rangeLabel(r.from, r.to)}</strong>
+          {' · '}
+          {days} {days > 1 ? 'jours' : 'jour'}
+          {period.vs ? ` · ${period.vs}` : ''}
+        </p>
+        <PeriodTimeline from={r.from} to={r.to} transactions={transactions} onChange={chooseRange} />
+        <p className="mt-2 text-xs text-fg-muted">Tirez une poignée pour changer une borne, ou faites glisser la fenêtre éclairée pour la déplacer.</p>
+      </section>
 
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
@@ -247,7 +265,7 @@ export default function Dashboard({ onEdit }) {
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: c.color }} />
                 <span>{c.name}</span>
                 <span className="num font-semibold text-fg">
-                  <Amount value={c.value} />
+                  <Amount value={c.value} animate />
                 </span>
               </div>
             ))}
@@ -339,7 +357,7 @@ export default function Dashboard({ onEdit }) {
                 <div className="flex items-center gap-3">
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
                   <span className="min-w-0 flex-1 truncate text-fg">{c.name}</span>
-                  <span className="serif text-[15px]"><Amount value={c.value} /></span>
+                  <span className="serif text-[15px]"><Amount value={c.value} animate /></span>
                   <span className="num w-11 shrink-0 text-right text-xs font-medium text-fg-muted">
                     {(c.share * 100).toFixed(c.share < 0.1 ? 1 : 0)} %
                   </span>

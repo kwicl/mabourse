@@ -14,6 +14,7 @@ import {
   saveWealthSynced,
 } from '../services/offlineStore';
 import { setPassword } from '../config';
+import { withVisual } from '../utils/categoryVisual';
 
 const { SHEETS } = api;
 const FinanceContext = createContext(null);
@@ -281,9 +282,13 @@ export function FinanceProvider({ children }) {
     [mutateLocal, mutateQueued, mutateWealthLocal],
   );
 
+  // Icône + couleur de chaque catégorie déduites de son nom (src/utils/categoryVisual.js)
+  const categories = useMemo(() => data.categories.map(withVisual), [data.categories]);
+
   const value = useMemo(
     () => ({
       ...data,
+      categories,
       status,
       error,
       syncing,
@@ -307,10 +312,10 @@ export function FinanceProvider({ children }) {
       wealthSynced,
       // Une même catégorie peut exister en dépense et en revenu : le type départage
       categoryById: (id, type) =>
-        data.categories.find((c) => c.id === id && (!type || c.type === type)) ?? data.categories.find((c) => c.id === id),
+        categories.find((c) => c.id === id && (!type || c.type === type)) ?? categories.find((c) => c.id === id),
       accountById: (id) => data.accounts.find((a) => a.id === id),
     }),
-    [data, status, error, syncing, offline, pending, flush, refresh, syncSource, importing, unlock, lock, crud, wealthSynced],
+    [data, categories, status, error, syncing, offline, pending, flush, refresh, syncSource, importing, unlock, lock, crud, wealthSynced],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

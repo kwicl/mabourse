@@ -170,7 +170,7 @@ export default function TransactionForm({ open, onClose, initial }) {
                       active ? 'bg-fg/10 ring-2 ring-accent' : 'hover:bg-fg/10'
                     }`}
                   >
-                    <CategoryIcon icon={c.icon} size={38} />
+                    <CategoryIcon icon={c.icon} color={c.color} size={38} />
                     <span className="w-full hyphens-auto break-words text-center">{c.name}</span>
                   </button>
                 );

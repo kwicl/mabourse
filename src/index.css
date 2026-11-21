@@ -172,3 +172,136 @@
   border: 3px solid transparent;
   background-clip: padding-box;
 }
+
+/* Frise de la période (src/components/PeriodTimeline.jsx) */
+.tl-track {
+  position: relative;
+  border-radius: 14px;
+  background: rgb(var(--fg) / 0.04);
+  box-shadow: inset 0 0 0 1px rgb(var(--border) / 0.6);
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.tl-dim {
+  fill: rgb(var(--fg) / 0.13);
+}
+.tl-lit {
+  fill: rgb(var(--accent) / 0.55);
+  stroke: rgb(var(--accent));
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.tl-tick {
+  stroke: rgb(var(--fg) / 0.25);
+}
+.tl-sel {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgb(var(--accent) / 0.12);
+  box-shadow: inset 0 0 0 1.5px rgb(var(--accent) / 0.75), 0 6px 18px -8px rgb(var(--accent) / 0.6);
+  cursor: grab;
+  touch-action: none;
+}
+.tl-sel.on {
+  cursor: grabbing;
+}
+.tl-sel-svg {
+  position: absolute;
+  inset: 0 auto auto 0;
+  pointer-events: none;
+}
+.tl-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 32px;
+  height: 100%;
+  cursor: ew-resize;
+  outline: none;
+  touch-action: none;
+}
+.tl-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 0 2px rgb(var(--second)), 0 3px 10px rgb(var(--shadow) / 0.35);
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s ease-out, height 0.2s ease-out;
+}
+.tl-grip::after {
+  content: '';
+  position: absolute;
+  inset: 9px 4px;
+  border-radius: 2px;
+  background: rgb(var(--on-accent) / 0.7);
+}
+.tl-handle:hover .tl-grip,
+.tl-handle.on .tl-grip {
+  height: 38px;
+}
+.tl-handle:focus-visible .tl-grip {
+  box-shadow: 0 0 0 2px rgb(var(--second)), 0 0 0 5px rgb(var(--accent) / 0.45);
+}
+/* Date au-dessus de la poignée : pendant le glisser ou au clavier */
+.tl-bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(var(--accent));
+  color: rgb(var(--on-accent));
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+.tl-handle.on .tl-bubble,
+.tl-handle:focus-visible .tl-bubble,
+.tl-handle:hover .tl-bubble {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+/* Glissement vers la nouvelle période (préréglage, saisie de date, clavier) */
+.tl-glide {
+  transition: transform 0.5s cubic-bezier(0.22, 0.9, 0.24, 1), width 0.5s cubic-bezier(0.22, 0.9, 0.24, 1);
+}
+.tl-month {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgb(var(--fg-muted));
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+/* Libellé de la plage : il se remplace en fondu quand la période change */
+@keyframes tl-swap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.tl-swap {
+  animation: tl-swap 0.35s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-glide,
+  .tl-grip,
+  .tl-bubble {
+    transition: none;
+  }
+  .tl-swap {
+    animation: none;
+  }
+}

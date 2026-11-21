@@ -16,8 +16,8 @@ export default function CategoryDonut({ data, limit = 5, height = 210, showLegen
   const t = useChartTheme();
   const [active, setActive] = useState(null);
 
-  // Couleurs par rang, issues du thème (accent en tête)
-  const top = data.slice(0, limit).map((d, i) => ({ ...d, color: t.ramp[i % t.ramp.length] }));
+  // Couleur propre à chaque catégorie (src/utils/categoryVisual.js), palette du thème en secours
+  const top = data.slice(0, limit).map((d, i) => ({ ...d, color: d.color || t.ramp[i % t.ramp.length] }));
   const rest = data.slice(limit).reduce((s, d) => s + d.value, 0);
   const total = data.reduce((s, d) => s + d.value, 0);
   const slices = rest > 0 ? [...top, { id: 'other', name: 'Autres', value: rest, color: t.other, icon: 'Circle', share: rest / total }] : top;

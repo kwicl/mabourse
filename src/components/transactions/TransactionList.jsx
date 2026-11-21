@@ -27,7 +27,7 @@ function Row({ t, onSelect }) {
           <ArrowLeftRight size={17} strokeWidth={1.8} />
         </span>
       ) : (
-        <CategoryIcon icon={cat?.icon} />
+        <CategoryIcon icon={cat?.icon} color={cat?.color} />
       )}
       <span className="min-w-0 flex-1">
         <span className="block break-words text-[14px] font-medium leading-snug">{title}</span>
