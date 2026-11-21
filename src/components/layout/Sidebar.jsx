@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ArrowLeftRight, BarChart3, LayoutGrid, Plus, RefreshCw, Settings, Target } from 'lucide-react';
+import { ArrowLeftRight, BarChart3, Landmark, LayoutGrid, Plus, RefreshCw, Settings, Target } from 'lucide-react';
 import Logo from './Logo';
 import NavBubble from '../fx/NavBubble';
 import { navigate } from '../../hooks/useHashRoute';
@@ -10,6 +10,7 @@ import OriginModeToggle from '../OriginModeToggle';
 export const NAV = [
   { id: 'dashboard', label: 'MiZanya', short: 'Accueil', icon: LayoutGrid },
   { id: 'transactions', label: 'Opérations', short: 'Opérations', icon: ArrowLeftRight },
+  { id: 'wealth', label: 'Patrimoine', short: 'Patrimoine', icon: Landmark },
   { id: 'budgets', label: 'Budgets', short: 'Budgets', icon: Target },
   { id: 'stats', label: 'Statistiques', short: 'Stats', icon: BarChart3 },
   { id: 'settings', label: 'Réglages', short: 'Réglages', icon: Settings },
@@ -85,10 +86,11 @@ export default function Sidebar({ route, onAdd }) {
 export function MobileNav({ route, onAdd }) {
   const items = NAV.filter((n) => n.id !== 'settings');
   const navRef = useRef(null);
+  const half = Math.ceil(items.length / 2); // le bouton + au milieu
   return (
     <nav ref={navRef} className="nav-bubble-host fixed inset-x-3 bottom-3 z-40 flex items-center justify-around nav-bar surface-second rounded-full border border-line px-2 py-2 shadow-lift lg:hidden">
       <NavBubble navRef={navRef} activeId={route} />
-      {items.slice(0, 2).map((n) => (
+      {items.slice(0, half).map((n) => (
         <MobileItem key={n.id} item={n} active={route === n.id} />
       ))}
       <button
@@ -98,7 +100,7 @@ export function MobileNav({ route, onAdd }) {
       >
         <Plus size={20} />
       </button>
-      {items.slice(2).map((n) => (
+      {items.slice(half).map((n) => (
         <MobileItem key={n.id} item={n} active={route === n.id} />
       ))}
     </nav>
@@ -111,7 +113,7 @@ function MobileItem({ item: { id, short, icon: Icon }, active }) {
       onClick={() => navigate(id)}
       data-nav-id={id}
       aria-current={active ? 'page' : undefined}
-      className={`flex flex-col items-center gap-0.5 px-2 text-[10px] font-medium transition-colors duration-300 ${active ? 'text-on-accent' : 'text-fg-muted'}`}
+      className={`flex min-w-0 flex-col items-center gap-0.5 px-1 text-[10px] font-medium transition-colors duration-300 ${active ? 'text-on-accent' : 'text-fg-muted'}`}
     >
       <Icon size={19} strokeWidth={active ? 2 : 1.6} />
       {short}

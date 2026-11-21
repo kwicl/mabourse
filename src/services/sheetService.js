@@ -5,7 +5,7 @@
  * Mode "proxy"  : en production sans URL directe, passe par api/sheets.js (jeton côté serveur, mot de passe).
  * Mode "local"  : aucune URL configurée -> données factices persistées dans localStorage.
  *
- * Feuilles : Transactions, Categories, Budgets, Accounts.
+ * Feuilles : Transactions, Categories, Budgets, Accounts, Assets (patrimoine), Valuations (historique des valeurs).
  * Toutes les méthodes renvoient des Promises.
  */
 import { getConfig, getPassword } from '../config';
@@ -16,6 +16,8 @@ export const SHEETS = {
   CATEGORIES: 'Categories',
   BUDGETS: 'Budgets',
   ACCOUNTS: 'Accounts',
+  ASSETS: 'Assets',
+  VALUATIONS: 'Valuations',
 };
 
 const LOCAL_DB_KEY = 'mabourse-local-db';
@@ -163,7 +165,9 @@ export async function create(sheet, data) {
   if (sheet === SHEETS.TRANSACTIONS && !row.createdAt) row.createdAt = new Date().toISOString();
   if (isRemote()) return remotePost({ action: 'create', sheet, data: row });
   const db = localDb();
-  db[sheet] = [...(db[sheet] ?? []), row];
+  const rows = db[sheet] ?? [];
+  // Même id (valeur du jour d'un actif) : remplace, comme le script Google
+  db[sheet] = rows.some((r) => r.id === row.id) ? rows.map((r) => (r.id === row.id ? { ...r, ...row } : r)) : [...rows, row];
   saveLocal(db);
   return delay(row);
 }
@@ -173,7 +177,7 @@ export async function update(sheet, id, data) {
   if (isRemote()) return remotePost({ action: 'update', sheet, id, data });
   const db = localDb();
   let updated = null;
-  db[sheet] = db[sheet].map((r) => (r.id === id ? (updated = { ...r, ...data, id }) : r));
+  db[sheet] = (db[sheet] ?? []).map((r) => (r.id === id ? (updated = { ...r, ...data, id }) : r));
   if (!updated) throw new Error(`Introuvable : ${id}`);
   saveLocal(db);
   return delay(updated);
@@ -183,7 +187,7 @@ export async function update(sheet, id, data) {
 export async function remove(sheet, id) {
   if (isRemote()) return remotePost({ action: 'delete', sheet, id });
   const db = localDb();
-  db[sheet] = db[sheet].filter((r) => r.id !== id);
+  db[sheet] = (db[sheet] ?? []).filter((r) => r.id !== id);
   saveLocal(db);
   return delay({ id, deleted: true });
 }

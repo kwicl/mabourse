@@ -5,7 +5,8 @@
  *  1. Créer un Google Sheet vide.
  *  2. Extensions > Apps Script, coller ce fichier dans Code.gs.
  *  3. Exécuter une fois la fonction setup() (autoriser l'accès) : crée les feuilles
- *     Transactions, Categories, Budgets, Accounts avec leurs en-têtes et des catégories par défaut.
+ *     Transactions, Categories, Budgets, Accounts, Assets, Valuations avec leurs en-têtes et des catégories par défaut.
+ *     (Assets / Valuations sont aussi créées automatiquement au premier accès.)
  *  4. Paramètres du projet > Propriétés du script : ajouter API_TOKEN = <un secret long>.
  *  5. Déployer > Nouveau déploiement > Type "Application Web"
  *       - Exécuter en tant que : Moi
@@ -28,9 +29,13 @@ var SCHEMA = {
   Categories: ['id', 'name', 'type', 'icon', 'color'],
   Budgets: ['id', 'categoryId', 'amount'],
   Accounts: ['id', 'name', 'type', 'initialBalance', 'color'],
+  // Patrimoine : immobilier (kind=property), bourse (kind=stock), or (kind=gold). Voir src/utils/wealth.js
+  Assets: ['id', 'kind', 'subtype', 'name', 'symbol', 'quantity', 'cost', 'price', 'date', 'loan', 'rent', 'charges', 'location', 'note', 'updatedAt'],
+  // Valeur d'un actif à une date (une ligne par actif et par jour : id = assetId-date)
+  Valuations: ['id', 'assetId', 'date', 'value'],
 };
 
-var NUMERIC = { amount: true, initialBalance: true };
+var NUMERIC = { amount: true, initialBalance: true, quantity: true, cost: true, price: true, loan: true, rent: true, charges: true, value: true };
 
 function setup() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -255,8 +260,14 @@ function doPost(e) {
 
 function sheet_(name) {
   if (!SCHEMA[name]) throw new Error('Feuille inconnue : ' + name);
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sh) throw new Error('Feuille absente, exécutez setup() : ' + name);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    // Nouvelle feuille ajoutée au schéma : créée à la volée avec ses en-têtes
+    sh = ss.insertSheet(name);
+    sh.getRange(1, 1, 1, SCHEMA[name].length).setValues([SCHEMA[name]]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
   return sh;
 }
 

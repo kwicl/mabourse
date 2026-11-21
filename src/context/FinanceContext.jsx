@@ -1,13 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from '../services/sheetService';
-import { KEY_BY_SHEET, applyOps, enqueue, loadCache, loadQueue, saveCache, saveQueue } from '../services/offlineStore';
+import {
+  KEY_BY_SHEET,
+  applyOps,
+  enqueue,
+  loadCache,
+  loadQueue,
+  loadWealthLocal,
+  loadWealthSynced,
+  saveCache,
+  saveQueue,
+  saveWealthLocal,
+  saveWealthSynced,
+} from '../services/offlineStore';
 import { setPassword } from '../config';
 
 const { SHEETS } = api;
 const FinanceContext = createContext(null);
 
 
-const EMPTY = { transactions: [], categories: [], budgets: [], accounts: [] };
+const EMPTY = { transactions: [], categories: [], budgets: [], accounts: [], assets: [], valuations: [] };
+const WEALTH_SHEETS = [SHEETS.ASSETS, SHEETS.VALUATIONS];
 
 /** Données de départ : dernier état connu (cache) + opérations encore en attente -> l'app s'ouvre même sans réseau. */
 function initialState() {
@@ -32,6 +45,9 @@ export function FinanceProvider({ children }) {
   const queueRef = useRef(init.current.queue);
   const inflightRef = useRef(null);
   const flushingRef = useRef(false);
+  // false : le script Google déployé ne connaît pas encore le patrimoine -> stockage sur l'appareil
+  const wealthSyncRef = useRef(!api.isRemote() || loadWealthSynced());
+  const [wealthSynced, setWealthSynced] = useState(wealthSyncRef.current);
 
   const commit = useCallback((next) => {
     dataRef.current = next;
@@ -89,7 +105,31 @@ export function FinanceProvider({ children }) {
         categories: all[SHEETS.CATEGORIES] ?? [],
         budgets: all[SHEETS.BUDGETS] ?? [],
         accounts: all[SHEETS.ACCOUNTS] ?? [],
+        assets: all[SHEETS.ASSETS] ?? [],
+        valuations: all[SHEETS.VALUATIONS] ?? [],
       };
+      if (api.isRemote()) {
+        const serverHasWealth = SHEETS.ASSETS in all && SHEETS.VALUATIONS in all;
+        const local = loadWealthLocal();
+        if (!serverHasWealth) {
+          fresh.assets = local.assets;
+          fresh.valuations = local.valuations;
+        } else if (local.assets.length || local.valuations.length) {
+          // Script à jour : le patrimoine saisi sur l'appareil part vers Google Sheets
+          let q = queueRef.current;
+          [[SHEETS.ASSETS, local.assets], [SHEETS.VALUATIONS, local.valuations]].forEach(([sheet, rows]) =>
+            rows.forEach((r) => {
+              q = enqueue(q, { opId: api.uid(), sheet, ts: Date.now(), action: 'create', id: r.id, data: r }, inflightRef.current);
+            }),
+          );
+          setQueue(q);
+          saveWealthLocal({});
+          setTimeout(() => flush().catch(() => {}), 0);
+        }
+        wealthSyncRef.current = serverHasWealth;
+        saveWealthSynced(serverHasWealth);
+        setWealthSynced(serverHasWealth);
+      }
       if (api.isRemote()) saveCache(fresh);
       // Les opérations pas encore envoyées restent visibles par-dessus les données du serveur
       commit(applyOps(fresh, queueRef.current));
@@ -112,7 +152,7 @@ export function FinanceProvider({ children }) {
     } finally {
       setSyncing(false);
     }
-  }, [commit, flush]);
+  }, [commit, flush, setQueue]);
 
   useEffect(() => {
     refresh();
@@ -198,26 +238,47 @@ export function FinanceProvider({ children }) {
     [commit, flush, setQueue],
   );
 
+  // Patrimoine pas encore synchronisable : écrit sur l'appareil (cache + stockage dédié)
+  const mutateWealthLocal = useCallback(
+    (sheet, optimistic, result) => {
+      const key = KEY_BY_SHEET[sheet];
+      const next = { ...dataRef.current, [key]: optimistic(dataRef.current[key] ?? []) };
+      commit(next);
+      saveCache(next);
+      saveWealthLocal(next);
+      return Promise.resolve(result);
+    },
+    [commit],
+  );
+
   const crud = useCallback(
-    (sheet) => ({
+    (sheet) => {
+      const deviceOnly = () => api.isRemote() && !wealthSyncRef.current && WEALTH_SHEETS.includes(sheet);
+      return {
       add: async (row) => {
         const full = { id: api.uid(), ...row };
         if (sheet === SHEETS.TRANSACTIONS && !full.createdAt) full.createdAt = new Date().toISOString();
+        // Ligne au même id (valeur du jour d'un actif) : remplacée, jamais dupliquée
+        const upsert = (rows = []) => (rows.some((r) => r.id === full.id) ? rows.map((r) => (r.id === full.id ? { ...r, ...full } : r)) : [...rows, full]);
+        if (deviceOnly()) return mutateWealthLocal(sheet, upsert, full);
         if (!api.isRemote()) return mutateLocal(sheet, (rows) => [...rows, full], () => api.create(sheet, full));
-        return mutateQueued(sheet, (rows) => [...rows, full], { action: 'create', id: full.id, data: full });
+        return mutateQueued(sheet, upsert, { action: 'create', id: full.id, data: full });
       },
       update: (id, patch) => {
-        const opt = (rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
+        const opt = (rows = []) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
+        if (deviceOnly()) return mutateWealthLocal(sheet, opt, patch);
         if (!api.isRemote()) return mutateLocal(sheet, opt, () => api.update(sheet, id, patch));
         return mutateQueued(sheet, opt, { action: 'update', id, data: patch });
       },
       remove: (id) => {
-        const opt = (rows) => rows.filter((r) => r.id !== id);
+        const opt = (rows = []) => rows.filter((r) => r.id !== id);
+        if (deviceOnly()) return mutateWealthLocal(sheet, opt, { id, deleted: true });
         if (!api.isRemote()) return mutateLocal(sheet, opt, () => api.remove(sheet, id));
         return mutateQueued(sheet, opt, { action: 'delete', id, data: {} });
       },
-    }),
-    [mutateLocal, mutateQueued],
+      };
+    },
+    [mutateLocal, mutateQueued, mutateWealthLocal],
   );
 
   const value = useMemo(
@@ -240,12 +301,16 @@ export function FinanceProvider({ children }) {
       budgetsApi: crud(SHEETS.BUDGETS),
       categoriesApi: crud(SHEETS.CATEGORIES),
       accountsApi: crud(SHEETS.ACCOUNTS),
+      assetsApi: crud(SHEETS.ASSETS),
+      valuationsApi: crud(SHEETS.VALUATIONS),
+      /** false : patrimoine gardé sur l'appareil en attendant le script Google à jour */
+      wealthSynced,
       // Une même catégorie peut exister en dépense et en revenu : le type départage
       categoryById: (id, type) =>
         data.categories.find((c) => c.id === id && (!type || c.type === type)) ?? data.categories.find((c) => c.id === id),
       accountById: (id) => data.accounts.find((a) => a.id === id),
     }),
-    [data, status, error, syncing, offline, pending, flush, refresh, syncSource, importing, unlock, lock, crud],
+    [data, status, error, syncing, offline, pending, flush, refresh, syncSource, importing, unlock, lock, crud, wealthSynced],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

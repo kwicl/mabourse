@@ -10,6 +10,8 @@ export const KEY_BY_SHEET = {
   Categories: 'categories',
   Budgets: 'budgets',
   Accounts: 'accounts',
+  Assets: 'assets',
+  Valuations: 'valuations',
 };
 
 function read(key, fallback) {
@@ -28,6 +30,18 @@ function write(key, value) {
     /* stockage plein ou indisponible : la session reste en mémoire */
   }
 }
+
+/**
+ * Patrimoine en attente de synchro : tant que le script Google (Code.gs) déployé ne connaît pas
+ * les feuilles Assets / Valuations, ces données restent sur l'appareil, puis sont envoyées
+ * automatiquement dès que le script à jour est déployé.
+ */
+const WEALTH_KEY = 'mabourse-wealth-local-v1';
+const WEALTH_SYNCED_KEY = 'mabourse-wealth-synced';
+export const loadWealthLocal = () => ({ assets: [], valuations: [], ...read(WEALTH_KEY, {}) });
+export const saveWealthLocal = (w) => write(WEALTH_KEY, { assets: w.assets ?? [], valuations: w.valuations ?? [] });
+export const loadWealthSynced = () => read(WEALTH_SYNCED_KEY, false) === true;
+export const saveWealthSynced = (v) => write(WEALTH_SYNCED_KEY, v);
 
 export const loadCache = () => read(CACHE_KEY, null);
 export const saveCache = (data) => write(CACHE_KEY, data);

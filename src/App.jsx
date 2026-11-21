@@ -10,11 +10,12 @@ import Budgets from './pages/Budgets';
 import Stats from './pages/Stats';
 import Settings from './pages/Settings';
 import ThemesDemo from './pages/ThemesDemo';
+import Wealth from './pages/Wealth';
 import OriginModeToggle from './components/OriginModeToggle';
 import { useFinance } from './context/FinanceContext';
 import { useHashRoute, navigate } from './hooks/useHashRoute';
 
-const PAGES = { dashboard: Dashboard, transactions: Transactions, budgets: Budgets, stats: Stats, settings: Settings, themes: ThemesDemo };
+const PAGES = { dashboard: Dashboard, transactions: Transactions, wealth: Wealth, budgets: Budgets, stats: Stats, settings: Settings, themes: ThemesDemo };
 
 function greeting() {
   const h = new Date().getHours();
