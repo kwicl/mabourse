@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import Modal from '../ui/Modal';
 import Segmented from '../ui/Segmented';
@@ -33,13 +33,27 @@ export default function TransactionForm({ open, onClose, initial }) {
   const [err, setErr] = useState('');
   const [newCat, setNewCat] = useState(null); // null = fermé, sinon nom en cours de saisie
 
+  // Réinitialise uniquement à l'ouverture : une synchro en arrière-plan (refresh) recrée
+  // `accounts` / `initial` et ne doit pas effacer la saisie en cours.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpen.current) {
       setForm(initial ? { ...blank(accounts), ...initial, amount: String(initial.amount) } : blank(accounts));
       setErr('');
       setNewCat(null);
     }
+    wasOpen.current = open;
   }, [open, initial, accounts]);
+
+  // Comptes chargés après l'ouverture : compléter sans toucher au reste
+  useEffect(() => {
+    if (!open || !accounts.length) return;
+    setForm((f) =>
+      f.accountId && f.toAccountId
+        ? f
+        : { ...f, accountId: f.accountId || accounts[0]?.id || '', toAccountId: f.toAccountId || accounts[1]?.id || '' }
+    );
+  }, [open, accounts]);
 
   const cats = useMemo(() => categories.filter((c) => c.type === form.type), [categories, form.type]);
 
