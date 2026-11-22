@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { moneyParts, signedMoney } from '../../utils/format';
 import { cashPending } from '../../utils/cashRegister';
+import { animate as animateFrames } from '../../utils/animate';
 
 const DURATION = 1100;
 const TWEEN = 550;
@@ -18,11 +19,9 @@ export default function Amount({ value, sign = '', hidden = false, className = '
   const [delta, setDelta] = useState(null);
   const [cash, setCash] = useState(false);
   const current = useRef(value); // valeur affichée à l'instant (point de départ d'une nouvelle animation)
-  const raf = useRef(0);
 
   useEffect(() => {
     const from = current.current;
-    cancelAnimationFrame(raf.current);
     const settle = () => {
       current.current = value;
       setShown(value);
@@ -35,24 +34,20 @@ export default function Amount({ value, sign = '', hidden = false, className = '
     const register = cashPending();
     setCash(register);
     const duration = register ? DURATION : TWEEN;
-    const start = performance.now();
-    const tick = (now) => {
-      const p = Math.min(1, (now - start) / duration);
+    const stop = animateFrames(duration, (p) => {
       const eased = 1 - Math.pow(1 - p, 3);
       // Caisse : paliers comme les rouleaux d'une caisse mécanique ; période : glissement continu
       const k = register ? Math.round(eased * 24) / 24 : eased;
       const v = p >= 1 ? value : from + (value - from) * k;
       current.current = v;
       setShown(v);
-      if (p < 1) raf.current = requestAnimationFrame(tick);
-      else setCash(false);
-    };
-    raf.current = requestAnimationFrame(tick);
-    if (!register) return () => cancelAnimationFrame(raf.current);
+      if (p >= 1) setCash(false);
+    });
+    if (!register) return stop;
     setDelta({ v: value - from, key: Date.now() });
     const t = setTimeout(() => setDelta(null), 1900);
     return () => {
-      cancelAnimationFrame(raf.current);
+      stop();
       clearTimeout(t);
     };
   }, [value, animate, hidden]);

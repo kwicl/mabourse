@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { animate } from '../utils/animate';
 
 /** Ré-échantillonne une série à `n` points (interpolation linéaire), pour animer entre deux longueurs. */
 export function resample(src, n) {
@@ -35,17 +36,11 @@ export function useTweenArray(target, { duration = 450, grow = true } = {}) {
       }
       return undefined;
     }
-    let raf = 0;
-    const t0 = performance.now();
-    const tick = (now) => {
-      const t = Math.min(1, (now - t0) / duration);
+    return animate(duration, (t) => {
       const e = 1 - (1 - t) ** 3;
       shown.current = t >= 1 ? target : target.map((v, i) => from[i] + (v - from[i]) * e);
       bump((n) => n + 1);
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    });
   }, [target, duration]);
 
   return shown.current;
