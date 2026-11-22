@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import ThemesDemo from './pages/ThemesDemo';
 import Wealth from './pages/Wealth';
 import OriginModeToggle from './components/OriginModeToggle';
+import SpentBanner from './components/SpentBanner';
 import { useFinance } from './context/FinanceContext';
 import { useHashRoute, navigate } from './hooks/useHashRoute';
 
@@ -82,6 +83,7 @@ export default function App() {
         {status === 'error' && route === 'settings' && <div className="mt-5"><Settings /></div>}
       </main>
 
+      {status === 'ready' && <SpentBanner />}
       <MobileNav route={route} onAdd={openAdd} />
       <TransactionForm open={form.open} initial={form.initial} onClose={close} />
     </div>

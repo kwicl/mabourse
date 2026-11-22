@@ -11,7 +11,7 @@ export default function Modal({ open, onClose, title, children }) {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
+    <div className="modal-shell fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <div className="absolute inset-0 bg-main/70 backdrop-blur-md" onClick={onClose} />
       <div
         role="dialog"

@@ -1,0 +1,196 @@
+/* Mini-fenêtre « consommé » (SpentBanner.jsx) : plaque en relief, pièce qui tourne. */
+.spent {
+  --spent-edge: 8px;
+  --spent-bottom: 92px; /* au-dessus de la barre de navigation du téléphone */
+  --fg: var(--on-second);
+  --fg-muted: var(--s-muted);
+  --accent-ink: var(--s-accent-ink);
+  position: fixed;
+  z-index: 55; /* au-dessus de la fenêtre de saisie (50) */
+  top: calc(var(--vv-top, 0px) + var(--spent-edge) + env(safe-area-inset-top, 0px));
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+  perspective: 480px;
+  color: rgb(var(--fg));
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  outline: none;
+}
+.spent.is-floating {
+  top: calc(var(--vv-top, 0px) + var(--spent-edge) + var(--y) * (100% - var(--spent-edge) - var(--spent-bottom)));
+  left: calc(var(--spent-edge) + var(--x) * (100% - 2 * var(--spent-edge)));
+  transform: translate(calc(var(--x) * -100%), calc(var(--y) * -100%));
+}
+.spent.is-moving {
+  cursor: grabbing;
+}
+
+/* La plaque : face bombée, tranche extrudée couleur accent, ombre portée */
+.spent-slab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 8px 0 7px;
+  border-radius: 17px;
+  border: 1px solid rgb(var(--accent-hi) / 0.65);
+  background:
+    linear-gradient(170deg, rgb(255 255 255 / 0.17), transparent 48%, rgb(0 0 0 / 0.12)),
+    rgb(var(--second));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 -3px 6px rgb(0 0 0 / 0.16),
+    0 1px 0 rgb(var(--accent)),
+    0 2px 0 rgb(var(--accent)),
+    0 3px 0 rgb(var(--accent) / 0.85),
+    0 4px 0 rgb(var(--shadow)),
+    0 5px 0 rgb(var(--shadow) / 0.8),
+    0 14px 22px -6px rgb(0 0 0 / 0.55),
+    0 8px 26px -10px rgb(var(--accent) / 0.8);
+  transform: rotateX(9deg) rotateY(var(--tilt, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out, height 0.25s ease-out, outline-color 0.2s;
+  outline: 2px solid transparent;
+  outline-offset: 7px;
+}
+.spent.is-moving .spent-slab {
+  transform: rotateX(16deg) rotateY(var(--tilt, 0deg)) scale(1.07);
+}
+.spent.will-snap .spent-slab,
+.spent:focus-visible .spent-slab {
+  outline-color: rgb(var(--accent));
+}
+
+/* La pièce */
+.spent-coin {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: rgb(var(--on-accent));
+  background: radial-gradient(circle at 32% 25%, rgb(var(--accent-hi)), rgb(var(--accent)) 62%);
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 0.22),
+    inset 0 -3px 4px rgb(0 0 0 / 0.22),
+    0 2px 0 rgb(var(--shadow)),
+    0 5px 8px rgb(0 0 0 / 0.35);
+  transform: translateZ(16px);
+  animation: spent-spin 0.85s cubic-bezier(0.22, 0.9, 0.24, 1);
+}
+.spent-coin svg {
+  width: 17px;
+  height: 17px;
+}
+@keyframes spent-spin {
+  from {
+    transform: translateZ(16px) rotateY(-360deg);
+  }
+  to {
+    transform: translateZ(16px) rotateY(0deg);
+  }
+}
+
+.spent-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  transform: translateZ(8px);
+}
+.spent-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  line-height: 13px;
+  color: rgb(var(--fg-muted));
+}
+.spent-value {
+  font-size: 19px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.spent-grip {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: rgb(var(--fg-muted));
+}
+/* Montant ajouté : il s'envole sous la plaque, le haut de l'écran étant juste au-dessus */
+.spent .cash-delta {
+  top: calc(100% + 24px);
+  bottom: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgb(var(--accent));
+  color: rgb(var(--on-accent));
+  font-size: 11px;
+}
+
+/* Place réservée en haut de la page tant que la fenêtre est ancrée */
+:root:has(.spent.is-docked) #root main {
+  padding-top: calc(78px + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 1024px) {
+  .spent {
+    --spent-bottom: 8px;
+  }
+  /* centrée sur le contenu, à droite de la barre latérale */
+  .spent:not(.is-floating) {
+    left: calc(50% + 132px);
+  }
+}
+
+/* Saisie : en haut, réduite, sans capter les touchers ; le formulaire commence dessous */
+:root:has(.modal-shell) .spent {
+  top: calc(var(--vv-top, 0px) + 6px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+:root:has(.modal-shell) .spent-slab {
+  height: 38px;
+}
+:root:has(.modal-shell) .spent-coin {
+  width: 26px;
+  height: 26px;
+}
+:root:has(.modal-shell) .spent-coin svg {
+  width: 13px;
+  height: 13px;
+}
+:root:has(.modal-shell) .spent-text {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+:root:has(.modal-shell) .spent-value {
+  flex: none;
+  font-size: 15px;
+}
+:root:has(.modal-shell) .spent-grip {
+  display: none;
+}
+:root:has(.spent) .modal-shell {
+  padding-top: calc(60px + env(safe-area-inset-top, 0px));
+}
+:root:has(.spent) .modal-shell > [role='dialog'] {
+  max-height: 100%;
+}
+@media (max-width: 639px) {
+  /* téléphone : la saisie tient entre le bandeau et le clavier */
+  :root:has(.spent) .modal-shell {
+    top: var(--vv-top, 0px);
+    bottom: auto;
+    height: var(--vv-height, 100%);
+  }
+}

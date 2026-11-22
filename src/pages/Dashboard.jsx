@@ -13,31 +13,15 @@ import { useFinance } from '../context/FinanceContext';
 import { navigate } from '../hooks/useHashRoute';
 import { accountBalances, byCategory, byCategoryRange, seriesBetween, totalBalance, totalsBetween } from '../utils/stats';
 import { monthKey, pct, signedMoney, todayISO } from '../utils/format';
-import { PERIODS, periodRange, rangeLabel } from '../utils/periods';
+import { PERIODS, rangeLabel } from '../utils/periods';
+import { usePeriod } from '../hooks/usePeriod';
 import Amount from '../components/ui/Amount';
 import PeriodTimeline from '../components/PeriodTimeline';
 
 const change = (cur, prev) => (prev ? (cur - prev) / Math.abs(prev) : NaN);
 
-const PERIOD_KEY = 'mabourse-period';
-const CUSTOM_KEY = 'mabourse-period-custom';
 const HIDE_KEY = 'mabourse-hide-private';
 const PRIVATE_SERIES = ['balance', 'income'];
-const readPeriod = () => {
-  try {
-    const k = localStorage.getItem(PERIOD_KEY);
-    return PERIODS.some((p) => p.key === k) ? k : 'month';
-  } catch {
-    return 'month';
-  }
-};
-const readCustom = () => {
-  try {
-    return JSON.parse(localStorage.getItem(CUSTOM_KEY)) || null;
-  } catch {
-    return null;
-  }
-};
 const store = (k, v) => {
   try {
     localStorage.setItem(k, v);
@@ -88,26 +72,12 @@ function SeriesToggle({ visible, onToggle, totals, masked = [], series = SERIES 
 
 export default function Dashboard({ onEdit }) {
   const { transactions, categories, accounts, budgets, categoryById } = useFinance();
-  const [periodKey, setPeriodKey] = useState(readPeriod);
-  const [custom, setCustom] = useState(readCustom);
-  const choosePeriod = (k) => {
-    setPeriodKey(k);
-    store(PERIOD_KEY, k);
-  };
+  const { periodKey, period, range: r, choosePeriod, chooseRange } = usePeriod(transactions);
   // Saisie Du / Au : bascule en période personnalisée
   const chooseDate = (field, value) => {
     if (!value) return;
     const next = { from: r.from, to: r.to, [field]: value };
-    setCustom(next);
-    store(CUSTOM_KEY, JSON.stringify(next));
-    choosePeriod('custom');
-  };
-  // Frise : une plage tirée à la main devient la période personnalisée
-  const chooseRange = (from, to) => {
-    const next = { from, to };
-    setCustom(next);
-    store(CUSTOM_KEY, JSON.stringify(next));
-    choosePeriod('custom');
+    chooseRange(next.from, next.to);
   };
   // Solde, revenus et cash flow masqués par défaut (confidentialité) ; le choix est mémorisé sur l'appareil
   const [hidePrivate, setHidePrivate] = useState(() => {
@@ -141,9 +111,6 @@ export default function Dashboard({ onEdit }) {
     });
 
   const m = monthKey(todayISO());
-  const r = useMemo(() => periodRange(periodKey, transactions, custom), [periodKey, transactions, custom]);
-  const base = PERIODS.find((p) => p.key === periodKey);
-  const period = periodKey === 'custom' ? { ...base, label: rangeLabel(r.from, r.to) } : base;
   const days = Math.round((new Date(`${r.to}T12:00:00`) - new Date(`${r.from}T12:00:00`)) / 86400000) + 1;
   const s = useMemo(() => {
     const cur = totalsBetween(transactions, r.from, r.to);
@@ -328,7 +295,7 @@ export default function Dashboard({ onEdit }) {
       </Card>
 
       {/* Graphiques détaillés : en bas du tableau de bord */}
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Card
           title="Évolution du solde"
           subtitle={
